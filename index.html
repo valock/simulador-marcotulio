@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0F2444" />
+<title>Simulador MCMV — Uberlândia</title>
+<meta name="description" content="Simulação gratuita Minha Casa Minha Vida em Uberlândia/MG. Descubra em 1 minuto seu financiamento, subsídio e parcela." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #0F2444;
+    --navy-soft: #1a3358;
+    --gold: #C8A84B;
+    --gold-dark: #a88a2f;
+    --bg: #F7F4EC;
+    --card: #ffffff;
+    --ink: #0F2444;
+    --muted: #6b7280;
+    --border: #E7E1D1;
+    --success: #10b981;
+    --danger: #ef4444;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;min-height:100dvh;}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow-x:hidden;}
+
+  .display{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;letter-spacing:-0.02em;}
+
+  .container{max-width:560px;margin:0 auto;padding:24px 20px 80px;}
+
+  /* HEADER */
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+  .brand-mark{
+    width:36px;height:36px;border-radius:10px;
+    background:var(--navy);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;
+  }
+  .brand-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:var(--navy);letter-spacing:-0.01em;}
+  .brand-sub{font-size:11px;color:var(--muted);margin-top:1px;letter-spacing:0.04em;text-transform:uppercase;}
+
+  /* CARD */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:0 1px 0 rgba(15,36,68,.04), 0 8px 32px -16px rgba(15,36,68,.12);
+  }
+
+  h1.display{font-size:30px;line-height:1.1;color:var(--navy);margin-bottom:8px;}
+  h2.display{font-size:22px;line-height:1.15;color:var(--navy);margin-bottom:6px;}
+  .lead{color:var(--muted);font-size:15px;line-height:1.5;margin-bottom:22px;}
+
+  label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;letter-spacing:0.01em;}
+
+  input[type="text"], input[type="tel"], input[type="number"]{
+    width:100%;
+    padding:14px 16px;
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    font-family:inherit;
+    font-size:16px;
+    color:var(--ink);
+    background:#fafaf7;
+    transition:border-color .15s, background .15s;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  input:focus{outline:none;border-color:var(--gold);background:#fff;}
+  input::placeholder{color:#b8b3a3;}
+
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;}
+
+  /* PRIMARY BUTTON */
+  .btn{
+    width:100%;
+    padding:16px 20px;
+    border:none;border-radius:12px;
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;
+    cursor:pointer;
+    transition:transform .08s, box-shadow .15s, background .15s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    letter-spacing:-0.01em;
+  }
+  .btn-primary{background:var(--navy);color:#fff;}
+  .btn-primary:hover{background:var(--navy-soft);}
+  .btn-primary:active{transform:translateY(1px);}
+  .btn-gold{background:var(--gold);color:var(--navy);}
+  .btn-gold:hover{background:var(--gold-dark);color:#fff;}
+  .btn-whats{background:#25D366;color:#fff;font-size:17px;padding:18px;}
+  .btn-whats:hover{background:#1ebe5d;}
+  .btn-ghost{background:transparent;color:var(--navy);border:1.5px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--navy);}
+
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* SEGMENTED CHOICE */
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .choices.col-3{grid-template-columns:1fr 1fr 1fr;}
+  .choice{
+    border:1.5px solid var(--border);
+    background:#fafaf7;
+    border-radius:12px;
+    padding:14px 12px;
+    text-align:center;
+    cursor:pointer;
+    transition:all .15s;
+    font-size:14px;
+    font-weight:600;
+    color:var(--navy);
+  }
+  .choice:hover{border-color:var(--navy);}
+  .choice.active{
+    background:var(--navy);
+    color:#fff;
+    border-color:var(--navy);
+  }
+  .choice small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:3px;text-transform:none;letter-spacing:0;}
+  .choice.active small{color:rgba(255,255,255,.7);}
+
+  /* STEP NAV */
+  .step-nav{display:flex;gap:10px;margin-top:20px;}
+  .step-nav .btn{flex:1;}
+
+  .progress{
+    display:flex;gap:6px;margin-bottom:24px;
+  }
+  .progress-step{
+    flex:1;height:4px;border-radius:2px;background:var(--border);
+    transition:background .25s;
+  }
+  .progress-step.done{background:var(--gold);}
+  .progress-step.current{background:var(--navy);}
+
+  /* RESULT */
+  .result-hero{
+    background:linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%);
+    color:#fff;
+    border-radius:16px;
+    padding:24px;
+    margin:-24px -24px 20px;
+    border-radius:20px 20px 0 0;
+  }
+  .result-hero .label{color:var(--gold);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;}
+  .result-hero .value{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:38px;line-height:1;letter-spacing:-0.02em;}
+  .result-hero .value .currency{font-size:18px;font-weight:600;color:var(--gold);margin-right:4px;vertical-align:top;}
+  .result-hero .sub{font-size:13px;color:rgba(255,255,255,.7);margin-top:6px;}
+
+  /* CTA WhatsApp dentro do hero do resultado — o primeiro que o cliente vê */
+  .hero-cta{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:16px;
+    background:#25D366;color:#fff;
+    padding:14px 18px;border-radius:12px;
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;
+    text-decoration:none;
+    transition:background .15s, transform .08s;
+    box-shadow:0 6px 16px -6px rgba(37,211,102,.6);
+  }
+  .hero-cta:hover{background:#1ebe5d;}
+  .hero-cta:active{transform:translateY(1px);}
+  .hero-cta-sub{
+    display:block;text-align:center;margin-top:8px;
+    font-size:11px;color:rgba(255,255,255,.6);
+    letter-spacing:0.02em;
+  }
+
+  /* DIVIDER "ou" entre o form do corretor e o atalho do cliente */
+  .divider{
+    position:relative;text-align:center;
+    margin:22px 0 18px;
+    font-size:11px;color:var(--muted);font-weight:600;
+    letter-spacing:0.12em;text-transform:uppercase;
+  }
+  .divider::before{
+    content:'';position:absolute;left:0;right:0;top:50%;
+    height:1px;background:var(--border);z-index:0;
+  }
+  .divider span{
+    position:relative;z-index:1;
+    background:var(--card);
+    padding:0 12px;
+  }
+
+  /* Atalho "É cliente?" no painel do corretor */
+  .client-shortcut{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:linear-gradient(135deg, #fffbef 0%, #fff5d6 100%);
+    border:1.5px solid #f0d780;
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:8px;
+  }
+  .client-shortcut-text{font-size:13px;line-height:1.4;color:var(--navy);}
+  .client-shortcut-text strong{font-size:14px;font-weight:700;}
+  .client-shortcut-text span{font-size:12px;color:var(--muted);font-weight:500;}
+  @media (max-width:380px){
+    .client-shortcut{flex-direction:column;align-items:stretch;text-align:center;}
+  }
+
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .result-item{
+    background:#fafaf7;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+  }
+  .result-item .label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
+  .result-item .value{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;color:var(--navy);letter-spacing:-0.01em;}
+  .result-item.highlight{background:#fff8e1;border-color:#f0d780;}
+  .result-item.highlight .value{color:var(--gold-dark);}
+
+  .summary{
+    background:#fafaf7;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:13px;
+    line-height:1.6;
+    color:var(--navy);
+    margin-bottom:16px;
+  }
+  .summary strong{font-weight:700;}
+
+  /* GENERATED LINK CARD */
+  .link-box{
+    background:#fafaf7;
+    border:1.5px dashed var(--gold);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    word-break:break-all;
+    font-family:ui-monospace,'SF Mono',monospace;
+    font-size:13px;
+    color:var(--navy);
+  }
+
+  .copy-btn{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:10px 14px;
+    border-radius:8px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .copy-btn:hover{background:var(--navy-soft);}
+  .copy-btn.copied{background:var(--success);}
+
+  /* FOOTER */
+  .foot{
+    text-align:center;
+    margin-top:24px;
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+  .foot a{color:var(--navy);text-decoration:none;font-weight:600;}
+
+  .badge{
+    display:inline-block;
+    background:var(--gold);
+    color:var(--navy);
+    font-size:10px;
+    font-weight:700;
+    padding:3px 8px;
+    border-radius:6px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+
+  /* WHATS PREVIEW */
+  .whats-preview{
+    background:#dcf8c6;
+    color:#000;
+    border-radius:8px 8px 8px 0;
+    padding:10px 12px;
+    font-size:13px;
+    line-height:1.45;
+    margin:10px 0 16px;
+    white-space:pre-wrap;
+    border-left:3px solid #25D366;
+  }
+
+  /* SHAKE */
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+  .shake{animation:shake .35s;}
+
+  /* FADE */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .fade-in{animation:fadeUp .25s ease-out;}
+
+  /* NOTES */
+  .note{
+    font-size:11px;color:var(--muted);line-height:1.5;
+    background:#fafaf7;border-left:3px solid var(--gold);
+    padding:10px 12px;border-radius:0 8px 8px 0;
+    margin-top:14px;
+  }
+
+  /* CTA EXTRA */
+  .restart{
+    background:transparent;border:none;color:var(--muted);font-size:13px;
+    text-decoration:underline;cursor:pointer;margin-top:14px;
+    font-family:inherit;width:100%;text-align:center;padding:8px;
+  }
+  .restart:hover{color:var(--navy);}
+
+  @media (max-width:380px){
+    h1.display{font-size:26px;}
+    .result-hero .value{font-size:32px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <!-- conteúdo injetado por JS -->
+</div>
+
+<script>
+/* =====================================================================
+   TABELA MCMV 04/2026 - IMÓVEL NA PLANTA - 420 MESES - UBERLÂNDIA/MG
+   Dados extraídos da planilha oficial Caixa (Associativo)
+   ===================================================================== */
+
+// Estrutura: cada item = {renda, financ, subsidio, parcela, taxa}
+// O sistema escolhe automaticamente o cenário pelo perfil
+
+const TABELA = {
+  // COTISTA FGTS (>36 meses) + COM dependente
+  cotista_com_dep: [
+    {r:1500,f:92072.96,s:55000.00,p:449.99,t:4.33},
+    {r:1600,f:98473.73,s:55000.00,p:479.99,t:4.33},
+    {r:1700,f:104874.50,s:55000.00,p:509.99,t:4.33},
+    {r:1800,f:111275.27,s:53588.00,p:539.99,t:4.33},
+    {r:1900,f:117676.05,s:47728.00,p:569.99,t:4.33},
+    {r:2000,f:124076.82,s:42274.00,p:599.99,t:4.33},
+    {r:2100,f:130477.59,s:37216.00,p:629.99,t:4.33},
+    {r:2200,f:132534.06,s:32840.00,p:659.99,t:4.59},
+    {r:2300,f:138731.68,s:28519.00,p:689.99,t:4.59},
+    {r:2400,f:144929.30,s:24561.00,p:719.99,t:4.59},
+    {r:2500,f:151126.92,s:20958.00,p:749.99,t:4.59},
+    {r:2600,f:157324.54,s:17699.00,p:779.99,t:4.59},
+    {r:2700,f:163522.16,s:14774.00,p:809.99,t:4.59},
+    {r:2800,f:169719.78,s:12172.00,p:839.99,t:4.59},
+    {r:2900,f:165421.67,s:10007.00,p:869.99,t:4.85},
+    {r:3000,f:171425.80,s:8004.00,p:899.99,t:4.85},
+    {r:3100,f:177430.07,s:6260.00,p:930.00,t:4.85},
+    {r:3200,f:183434.20,s:4845.00,p:960.00,t:4.85},
+    {r:3300,f:183620.53,s:3757.00,p:990.00,t:5.11},
+    {r:3400,f:189440.27,s:2872.00,p:1020.00,t:5.11},
+    {r:3500,f:195260.01,s:2244.00,p:1050.00,t:5.11},
+    {r:3600,f:189213.16,s:1919.00,p:1080.00,t:5.64},
+    {r:3700,f:194689.45,s:1777.00,p:1110.00,t:5.64},
+    {r:3800,f:200165.74,s:1762.00,p:1140.00,t:5.64},
+    {r:3900,f:205642.04,s:1762.00,p:1170.00,t:5.64},
+    {r:4000,f:208000.00,s:1762.00,p:1182.91,t:5.64},
+    {r:4100,f:192947.76,s:0,p:1230.00,t:6.69},
+    {r:4200,f:197826.17,s:0,p:1260.00,t:6.69},
+    {r:4300,f:202704.59,s:0,p:1290.00,t:6.69},
+    {r:4400,f:207583.00,s:0,p:1320.00,t:6.69},
+    {r:4500,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:4700,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:4800,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:4900,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:5000,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:5100,f:212002.26,s:0,p:1530.00,t:7.93},
+    {r:5200,f:216309.50,s:0,p:1560.00,t:7.93},
+    {r:5300,f:220616.73,s:0,p:1590.00,t:7.93},
+    {r:5400,f:224923.97,s:0,p:1620.00,t:7.93},
+    {r:5500,f:229231.21,s:0,p:1650.00,t:7.93},
+    {r:5600,f:233538.45,s:0,p:1680.00,t:7.93},
+    {r:5700,f:237845.69,s:0,p:1710.00,t:7.93},
+    {r:5800,f:242152.92,s:0,p:1740.00,t:7.93},
+    {r:6000,f:250767.40,s:0,p:1800.00,t:7.93},
+    {r:6500,f:272303.59,s:0,p:1950.00,t:7.93},
+    {r:7000,f:293839.78,s:0,p:2100.00,t:7.93},
+    {r:7500,f:315375.97,s:0,p:2250.00,t:7.93},
+    {r:8000,f:320000.00,s:0,p:2282.21,t:7.93},
+    {r:8500,f:320000.00,s:0,p:2282.21,t:7.93},
+    {r:9000,f:320000.00,s:0,p:2282.21,t:7.93},
+    {r:9600,f:320000.00,s:0,p:2282.21,t:7.93},
+  ],
+  // COTISTA FGTS + SEM dependente
+  cotista_sem_dep: [
+    {r:1500,f:92072.96,s:16500.00,p:449.99,t:4.33},
+    {r:1600,f:98473.73,s:16500.00,p:479.99,t:4.33},
+    {r:1700,f:104874.50,s:16500.00,p:509.99,t:4.33},
+    {r:1800,f:111275.27,s:16076.00,p:539.99,t:4.33},
+    {r:1900,f:117676.05,s:14318.00,p:569.99,t:4.33},
+    {r:2000,f:124076.82,s:12682.00,p:599.99,t:4.33},
+    {r:2100,f:130477.59,s:11164.00,p:629.99,t:4.33},
+    {r:2200,f:132534.06,s:9852.00,p:659.99,t:4.59},
+    {r:2300,f:138731.68,s:8555.00,p:689.99,t:4.59},
+    {r:2400,f:144929.30,s:7368.00,p:719.99,t:4.59},
+    {r:2500,f:151126.92,s:6287.00,p:749.99,t:4.59},
+    {r:2600,f:157324.54,s:5309.00,p:779.99,t:4.59},
+    {r:2700,f:163522.16,s:4432.00,p:809.99,t:4.59},
+    {r:2800,f:169719.78,s:3651.00,p:839.99,t:4.59},
+    {r:2900,f:165421.67,s:3002.00,p:869.99,t:4.85},
+    {r:3000,f:171425.80,s:2401.00,p:899.99,t:4.85},
+    {r:3100,f:177430.07,s:1878.00,p:930.00,t:4.85},
+    {r:3200,f:183434.20,s:0,p:960.00,t:5.11},
+    {r:3300,f:183620.53,s:0,p:990.00,t:5.11},
+    {r:3400,f:189440.27,s:0,p:1020.00,t:5.11},
+    {r:3500,f:195260.01,s:0,p:1050.00,t:5.11},
+    {r:3600,f:189213.16,s:0,p:1080.00,t:5.64},
+    {r:3700,f:194689.45,s:0,p:1110.00,t:5.64},
+    {r:3800,f:200165.74,s:0,p:1140.00,t:5.64},
+    {r:3900,f:205642.04,s:0,p:1170.00,t:5.64},
+    {r:4000,f:208000.00,s:0,p:1182.91,t:5.64},
+    {r:4100,f:192947.76,s:0,p:1230.00,t:6.69},
+    {r:4200,f:197826.17,s:0,p:1260.00,t:6.69},
+    {r:4300,f:202704.59,s:0,p:1290.00,t:6.69},
+    {r:4400,f:207583.00,s:0,p:1320.00,t:6.69},
+    {r:4500,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:4700,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:4800,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:4900,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:5000,f:208000.00,s:0,p:1322.56,t:6.69},
+    {r:5100,f:212002.26,s:0,p:1530.00,t:7.93},
+    {r:5200,f:216309.50,s:0,p:1560.00,t:7.93},
+    {r:5300,f:220616.73,s:0,p:1590.00,t:7.93},
+    {r:5400,f:224923.97,s:0,p:1620.00,t:7.93},
+    {r:5500,f:229231.21,s:0,p:1650.00,t:7.93},
+    {r:5600,f:233538.45,s:0,p:1680.00,t:7.93},
+    {r:5700,f:237845.69,s:0,p:1710.00,t:7.93},
+    {r:5800,f:242152.92,s:0,p:1740.00,t:7.93},
+    {r:6000,f:250767.40,s:0,p:1800.00,t:7.93},
+    {r:6500,f:272303.59,s:0,p:1950.00,t:7.93},
+    {r:7000,f:293839.78,s:0,p:2100.00,t:7.93},
+    {r:7500,f:315375.97,s:0,p:2250.00,t:7.93},
+    {r:8000,f:320000.00,s:0,p:2282.21,t:7.93},
+    {r:8500,f:320000.00,s:0,p:2282.21,t:7.93},
+    {r:9000,f:320000.00,s:0,p:2282.21,t:7.93},
+    {r:9600,f:320000.00,s:0,p:2282.21,t:7.93},
+  ],
+  // NÃO Cotista FGTS + COM dependente
+  nao_cotista_com_dep: [
+    {r:1500,f:86367.35,s:55000.00,p:449.99,t:4.85},
+    {r:1600,f:92371.47,s:55000.00,p:479.99,t:4.85},
+    {r:1700,f:98375.60,s:55000.00,p:509.99,t:4.85},
+    {r:1800,f:104379.72,s:54330.00,p:539.99,t:4.85},
+    {r:1900,f:110383.85,s:48434.00,p:569.99,t:4.85},
+    {r:2000,f:116387.98,s:42941.00,p:599.99,t:4.85},
+    {r:2100,f:122392.10,s:37840.00,p:629.99,t:4.85},
+    {r:2200,f:124453.16,s:33391.00,p:659.99,t:5.11},
+    {r:2300,f:130272.90,s:29025.00,p:689.99,t:5.11},
+    {r:2400,f:136092.63,s:25022.00,p:719.99,t:5.11},
+    {r:2500,f:141912.37,s:21373.00,p:749.99,t:5.11},
+    {r:2600,f:147732.11,s:18068.00,p:779.99,t:5.11},
+    {r:2700,f:153551.85,s:15098.00,p:809.99,t:5.11},
+    {r:2800,f:159371.59,s:12453.00,p:839.99,t:5.11},
+    {r:2900,f:155498.23,s:10235.00,p:869.99,t:5.37},
+    {r:3000,f:161142.18,s:8194.00,p:899.99,t:5.37},
+    {r:3100,f:166786.13,s:6417.00,p:930.00,t:5.37},
+    {r:3200,f:172430.07,s:4973.00,p:960.00,t:5.37},
+    {r:3300,f:172784.29,s:3854.00,p:990.00,t:5.64},
+    {r:3400,f:178260.58,s:2949.00,p:1020.00,t:5.64},
+    {r:3500,f:183736.87,s:2307.00,p:1050.00,t:5.64},
+    {r:3600,f:178409.57,s:1969.00,p:1080.00,t:6.16},
+    {r:3700,f:183573.18,s:1825.00,p:1110.00,t:6.16},
+    {r:3800,f:188736.79,s:1804.00,p:1140.00,t:6.16},
+    {r:3900,f:193900.40,s:1783.00,p:1170.00,t:6.16},
+    {r:4000,f:199064.00,s:1762.00,p:1200.00,t:6.16},
+    {r:4100,f:182641.27,s:0,p:1230.00,t:7.22},
+    {r:4200,f:187259.10,s:0,p:1260.00,t:7.22},
+    {r:4300,f:191876.93,s:0,p:1290.00,t:7.22},
+    {r:4400,f:196494.76,s:0,p:1320.00,t:7.22},
+    {r:4500,f:201112.58,s:0,p:1350.00,t:7.22},
+    {r:4700,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:4800,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:4900,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:5000,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:5100,f:201525.56,s:0,p:1530.00,t:8.47},
+    {r:5200,f:205619.95,s:0,p:1560.00,t:8.47},
+    {r:5300,f:209714.33,s:0,p:1590.00,t:8.47},
+    {r:5400,f:213808.71,s:0,p:1620.00,t:8.47},
+    {r:5500,f:217903.10,s:0,p:1650.00,t:8.47},
+    {r:5600,f:221997.48,s:0,p:1680.00,t:8.47},
+    {r:5700,f:226091.86,s:0,p:1710.00,t:8.47},
+    {r:5800,f:230186.25,s:0,p:1740.00,t:8.47},
+    {r:6000,f:238375.02,s:0,p:1800.00,t:8.47},
+    {r:6500,f:258846.93,s:0,p:1950.00,t:8.47},
+    {r:7000,f:279318.85,s:0,p:2100.00,t:8.47},
+    {r:7500,f:299790.77,s:0,p:2250.00,t:8.47},
+    {r:8000,f:320000.00,s:0,p:2398.08,t:8.47},
+    {r:8500,f:320000.00,s:0,p:2398.08,t:8.47},
+    {r:9000,f:320000.00,s:0,p:2398.08,t:8.47},
+    {r:9600,f:320000.00,s:0,p:2398.08,t:8.47},
+  ],
+  // NÃO Cotista FGTS + SEM dependente
+  nao_cotista_sem_dep: [
+    {r:1500,f:86367.35,s:16500.00,p:449.99,t:4.85},
+    {r:1600,f:92371.47,s:16500.00,p:479.99,t:4.85},
+    {r:1700,f:98375.60,s:16500.00,p:509.99,t:4.85},
+    {r:1800,f:104379.72,s:16299.00,p:539.99,t:4.85},
+    {r:1900,f:110383.85,s:14530.00,p:569.99,t:4.85},
+    {r:2000,f:116387.98,s:12882.00,p:599.99,t:4.85},
+    {r:2100,f:122392.10,s:11352.00,p:629.99,t:4.85},
+    {r:2200,f:124453.16,s:10017.00,p:659.99,t:5.11},
+    {r:2300,f:130272.90,s:8707.00,p:689.99,t:5.11},
+    {r:2400,f:136092.63,s:7506.00,p:719.99,t:5.11},
+    {r:2500,f:141912.37,s:6411.00,p:749.99,t:5.11},
+    {r:2600,f:147732.11,s:5420.00,p:779.99,t:5.11},
+    {r:2700,f:153551.85,s:4529.00,p:809.99,t:5.11},
+    {r:2800,f:159371.59,s:3735.00,p:839.99,t:5.11},
+    {r:2900,f:155498.23,s:3070.00,p:869.99,t:5.37},
+    {r:3000,f:161142.18,s:2458.00,p:899.99,t:5.37},
+    {r:3100,f:166786.13,s:1925.00,p:930.00,t:5.37},
+    {r:3200,f:172430.07,s:0,p:960.00,t:5.64},
+    {r:3300,f:172784.29,s:0,p:990.00,t:5.64},
+    {r:3400,f:178260.58,s:0,p:1020.00,t:5.64},
+    {r:3500,f:183736.87,s:0,p:1050.00,t:5.64},
+    {r:3600,f:178409.57,s:0,p:1080.00,t:6.16},
+    {r:3700,f:183573.18,s:0,p:1110.00,t:6.16},
+    {r:3800,f:188736.79,s:0,p:1140.00,t:6.16},
+    {r:3900,f:193900.40,s:0,p:1170.00,t:6.16},
+    {r:4000,f:199064.00,s:0,p:1200.00,t:6.16},
+    {r:4100,f:182641.27,s:0,p:1230.00,t:7.22},
+    {r:4200,f:187259.10,s:0,p:1260.00,t:7.22},
+    {r:4300,f:191876.93,s:0,p:1290.00,t:7.22},
+    {r:4400,f:196494.76,s:0,p:1320.00,t:7.22},
+    {r:4500,f:201112.58,s:0,p:1350.00,t:7.22},
+    {r:4700,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:4800,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:4900,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:5000,f:208000.00,s:0,p:1394.74,t:7.22},
+    {r:5100,f:201525.56,s:0,p:1530.00,t:8.47},
+    {r:5200,f:205619.95,s:0,p:1560.00,t:8.47},
+    {r:5300,f:209714.33,s:0,p:1590.00,t:8.47},
+    {r:5400,f:213808.71,s:0,p:1620.00,t:8.47},
+    {r:5500,f:217903.10,s:0,p:1650.00,t:8.47},
+    {r:5600,f:221997.48,s:0,p:1680.00,t:8.47},
+    {r:5700,f:226091.86,s:0,p:1710.00,t:8.47},
+    {r:5800,f:230186.25,s:0,p:1740.00,t:8.47},
+    {r:6000,f:238375.02,s:0,p:1800.00,t:8.47},
+    {r:6500,f:258846.93,s:0,p:1950.00,t:8.47},
+    {r:7000,f:279318.85,s:0,p:2100.00,t:8.47},
+    {r:7500,f:299790.77,s:0,p:2250.00,t:8.47},
+    {r:8000,f:320000.00,s:0,p:2398.08,t:8.47},
+    {r:8500,f:320000.00,s:0,p:2398.08,t:8.47},
+    {r:9000,f:320000.00,s:0,p:2398.08,t:8.47},
+    {r:9600,f:320000.00,s:0,p:2398.08,t:8.47},
+  ],
+  // CLASSE MÉDIA — sem subsídio, sem benefício de cotista (imóvel até R$600mil)
+  classe_media: [
+    {r:10000,f:336874.70,s:0,p:3000.00,t:10.47},
+    {r:10500,f:354106.73,s:0,p:3150.00,t:10.47},
+    {r:11000,f:371338.76,s:0,p:3300.00,t:10.47},
+    {r:11500,f:388570.79,s:0,p:3450.00,t:10.47},
+    {r:12000,f:405802.82,s:0,p:3600.00,t:10.47},
+    {r:12500,f:423034.85,s:0,p:3750.00,t:10.47},
+    {r:13000,f:440266.88,s:0,p:3900.00,t:10.47},
+  ],
+};
+
+/* =====================================================================
+   CONSTANTES
+   ===================================================================== */
+
+// Domínio final de produção (link compartilhável aponta sempre pra cá)
+const PROD_BASE_URL = 'https://simulador.marcotulio.pro/';
+
+// WhatsApp do "dono do site" — usado quando o cliente pula direto sem corretor
+const SUPORTE_PHONE = '5534996778075';   // Marco Túlio Andrade
+const SUPORTE_NAME  = 'Marco Túlio';
+
+// Regra Caixa: idade máxima ao final do contrato = 80 anos e 2 meses
+const IDADE_MAX_FIM_CONTRATO_MESES = 80 * 12 + 2;  // = 962 meses
+const PRAZO_PADRAO_MESES = 420;                    // 35 anos
+const PRAZO_MIN_VIAVEL_MESES = 60;                 // 5 anos: abaixo disso, alerta
+
+/* =====================================================================
+   ESTADO DA APLICAÇÃO
+   ===================================================================== */
+
+const state = {
+  mode: null,           // 'corretor' | 'cliente'
+  corretorPhone: null,  // só dígitos
+  corretorName: null,
+  modoSuporte: false,   // true quando cliente entra direto sem link de corretor
+  // dados da calculadora
+  step: 0,
+  nome: '',
+  anoNasc: null,        // ano de nascimento (ex: 1985)
+  cotista: null,        // true/false
+  dependente: null,     // true/false
+  renda: null,          // número
+  classeAlta: false,    // renda >= 10k
+};
+
+// Steps visíveis na barra de progresso (não conta o resultado):
+// 0=nome, 1=ano, 2=renda, 3=cotista, 4=dep, 5=resultado
+const STEPS_TOTAL = 5;
+
+/* =====================================================================
+   UTILS
+   ===================================================================== */
+
+function formatBRL(v){
+  return v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function formatBRLCurto(v){
+  if (v >= 1000) return (v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mil';
+  return v.toLocaleString('pt-BR',{maximumFractionDigits:0});
+}
+
+function onlyDigits(s){ return (s||'').replace(/\D/g,''); }
+
+function formatPhone(digits){
+  digits = onlyDigits(digits);
+  if (digits.length === 0) return '';
+  if (digits.length <= 2) return '(' + digits;
+  if (digits.length <= 7) return '(' + digits.slice(0,2) + ') ' + digits.slice(2);
+  if (digits.length <= 11) return '(' + digits.slice(0,2) + ') ' + digits.slice(2,7) + '-' + digits.slice(7);
+  return '(' + digits.slice(0,2) + ') ' + digits.slice(2,7) + '-' + digits.slice(7,11);
+}
+
+function formatRenda(digits){
+  digits = onlyDigits(digits);
+  if (!digits) return '';
+  const n = parseInt(digits,10);
+  return n.toLocaleString('pt-BR');
+}
+
+function buscarLinhaTabela(tabela, renda){
+  // Acha o item com renda mais próxima (≤ renda informada)
+  let melhor = null;
+  for (const item of tabela){
+    if (item.r <= renda) melhor = item;
+    else break;
+  }
+  // Se renda for menor que a primeira (ex: 1200), usa a primeira (1500)
+  if (!melhor) melhor = tabela[0];
+  return melhor;
+}
+
+/**
+ * Calcula o prazo máximo de financiamento pela idade (regra Caixa).
+ * Idade ao final do contrato não pode ultrapassar 80 anos e 2 meses.
+ * Aproximação: usa só o ano de nascimento (assume fim do ano corrente).
+ */
+function calcularPrazoMaxPorIdade(anoNasc){
+  const anoAtual = new Date().getFullYear();
+  // idade aproximada em meses (usando só o ano, assume mês 0)
+  const idadeMeses = (anoAtual - anoNasc) * 12;
+  const prazoMax = IDADE_MAX_FIM_CONTRATO_MESES - idadeMeses;
+  return Math.max(0, prazoMax);
+}
+
+/**
+ * Ajusta o financiamento quando o prazo é menor que 420 meses.
+ * Mantém a parcela fixa (regra Caixa: parcela ≤ 30% renda).
+ * Aplica fator PRICE: PV = PMT × [1 - (1+i)^-n] / i
+ * Retorna {financ, prazoUsado}.
+ */
+function ajustarFinanciamentoPorPrazo(linha, prazoMaxMeses){
+  if (prazoMaxMeses >= PRAZO_PADRAO_MESES){
+    return {financ: linha.f, prazoUsado: PRAZO_PADRAO_MESES, ajustado: false};
+  }
+  if (prazoMaxMeses <= 0){
+    return {financ: 0, prazoUsado: 0, ajustado: true};
+  }
+  // Taxa mensal a partir da anual (juros compostos)
+  const taxaAnual = linha.t / 100;
+  const iMensal = Math.pow(1 + taxaAnual, 1/12) - 1;
+
+  // Fator PRICE para os dois prazos
+  const fatorNovo = (1 - Math.pow(1 + iMensal, -prazoMaxMeses)) / iMensal;
+  const fator420  = (1 - Math.pow(1 + iMensal, -PRAZO_PADRAO_MESES)) / iMensal;
+
+  // Novo financiamento proporcional
+  const financAjustado = linha.f * (fatorNovo / fator420);
+  return {financ: financAjustado, prazoUsado: prazoMaxMeses, ajustado: true};
+}
+
+function calcular(){
+  // Decide qual tabela usar
+  let linha, chave, imovelMax;
+
+  if (state.renda >= 10000){
+    state.classeAlta = true;
+    linha = buscarLinhaTabela(TABELA.classe_media, Math.min(state.renda, 13000));
+    chave = 'classe_media';
+    imovelMax = 600000;
+  } else {
+    if (state.cotista && state.dependente) chave = 'cotista_com_dep';
+    else if (state.cotista && !state.dependente) chave = 'cotista_sem_dep';
+    else if (!state.cotista && state.dependente) chave = 'nao_cotista_com_dep';
+    else chave = 'nao_cotista_sem_dep';
+
+    linha = buscarLinhaTabela(TABELA[chave], state.renda);
+    // Teto do imóvel: até R$4.000 de renda = R$260mil, acima = R$400mil
+    imovelMax = state.renda <= 4000 ? 260000 : 400000;
+  }
+
+  // Aplica ajuste por idade
+  const prazoMax = calcularPrazoMaxPorIdade(state.anoNasc);
+  const ajuste = ajustarFinanciamentoPorPrazo(linha, prazoMax);
+
+  // Cria uma cópia da linha com o financiamento ajustado
+  const linhaAjustada = {
+    ...linha,
+    f: ajuste.financ,
+    fOriginal: linha.f, // guarda o original pra mostrar a diferença se houver
+  };
+
+  return {
+    linha: linhaAjustada,
+    tabelaUsada: chave,
+    imovelMax,
+    prazoUsado: ajuste.prazoUsado,
+    prazoAjustado: ajuste.ajustado,
+    idadeAtual: new Date().getFullYear() - state.anoNasc,
+  };
+}
+
+/* =====================================================================
+   ROTEAMENTO
+   ===================================================================== */
+
+function init(){
+  const params = new URLSearchParams(window.location.search);
+  const w = onlyDigits(params.get('w') || '');
+  const n = params.get('n') || '';
+
+  if (w && w.length >= 10){
+    state.mode = 'cliente';
+    state.corretorPhone = w;
+    state.corretorName = n || 'Marco Túlio';
+    // Marca modo suporte: cliente entrou direto pelo botão da home,
+    // sem link de corretor parceiro → conversa é "tira-dúvida", não pré-venda
+    state.modoSuporte = (w === SUPORTE_PHONE);
+    state.step = 0;
+    renderCliente();
+  } else {
+    state.mode = 'corretor';
+    renderCorretor();
+  }
+}
+
+/* =====================================================================
+   TELA DO CORRETOR
+   ===================================================================== */
+
+function renderCorretor(){
+  const phoneInit = state.corretorPhone ? formatPhone(state.corretorPhone) : '';
+  document.getElementById('app').innerHTML = `
+    <div class="brand fade-in">
+      <div class="brand-mark">T</div>
+      <div>
+        <div class="brand-name">Torrano Imóveis</div>
+        <div class="brand-sub">Simulador MCMV · Uberlândia</div>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <span class="badge">Painel do corretor</span>
+      <h1 class="display">Gere seu link de simulação</h1>
+      <p class="lead">Coloque seu WhatsApp e pegue um link pronto pra mandar nos contatos. O cliente faz a simulação sozinho e o botão final cai direto na sua conversa.</p>
+
+      <div style="margin-bottom:16px;">
+        <label for="nomeCorretor">Seu nome (opcional)</label>
+        <input type="text" id="nomeCorretor" placeholder="Ex: Marco Túlio" value="${state.corretorName || ''}" autocomplete="name" />
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label for="phoneCorretor">Seu WhatsApp (com DDD)</label>
+        <input type="tel" id="phoneCorretor" placeholder="(34) 99677-8075" value="${phoneInit}" autocomplete="tel" inputmode="numeric" />
+        <div class="hint">Só números. Vou formatar pra você.</div>
+      </div>
+
+      <button class="btn btn-primary" id="btnGerar">Gerar meu link →</button>
+
+      <div id="linkResult"></div>
+
+      <div class="divider"><span>ou</span></div>
+
+      <div class="client-shortcut">
+        <div class="client-shortcut-text">
+          <strong>É cliente?</strong><br>
+          <span>Quer só simular seu financiamento agora?</span>
+        </div>
+        <a href="?w=${SUPORTE_PHONE}&n=${encodeURIComponent(SUPORTE_NAME)}" class="btn btn-gold" style="text-decoration:none;width:auto;padding:12px 18px;font-size:14px;">
+          Simular agora →
+        </a>
+      </div>
+
+      <div class="note">
+        💡 Dica: salve esse link e use ele em todos os disparos. Você pode até gerar um QR Code dele pra colocar no carro, fachada e cartão de visita.
+      </div>
+    </div>
+
+    <div class="foot">
+      © Torrano Imóveis · CRECI PJ 7469 · Uberlândia/MG<br>
+      Tabela MCMV 04/2026 · Imóvel na planta · até 420 meses<br>
+      <a href="${PROD_BASE_URL}" target="_blank">simulador.marcotulio.pro</a>
+    </div>
+  `;
+
+  const phoneInput = document.getElementById('phoneCorretor');
+  phoneInput.addEventListener('input', e => {
+    const cursorAtEnd = e.target.selectionStart === e.target.value.length;
+    e.target.value = formatPhone(e.target.value);
+    if (cursorAtEnd) e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+  });
+
+  document.getElementById('btnGerar').addEventListener('click', () => {
+    const phone = onlyDigits(phoneInput.value);
+    const nome = document.getElementById('nomeCorretor').value.trim();
+
+    if (phone.length < 10 || phone.length > 13){
+      phoneInput.classList.add('shake');
+      setTimeout(()=>phoneInput.classList.remove('shake'), 400);
+      phoneInput.focus();
+      return;
+    }
+
+    // Adiciona 55 (Brasil) se ainda não tiver
+    let phoneFull = phone;
+    if (!phoneFull.startsWith('55')) phoneFull = '55' + phoneFull;
+
+    state.corretorPhone = phoneFull;
+    state.corretorName = nome;
+
+    // Link compartilhável sempre aponta pro domínio de produção
+    const params = new URLSearchParams();
+    params.set('w', phoneFull);
+    if (nome) params.set('n', nome);
+    const link = PROD_BASE_URL + '?' + params.toString();
+
+    // Link de teste usa o host atual (pra preview/dev funcionar)
+    const linkTeste = window.location.origin + window.location.pathname + '?' + params.toString();
+
+    document.getElementById('linkResult').innerHTML = `
+      <div class="fade-in" style="margin-top:20px;">
+        <label style="color:var(--success);">✓ Link gerado</label>
+        <div class="link-box">${link}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="copy-btn" id="copyLink">📋 Copiar link</button>
+          <button class="copy-btn" id="testLink" style="background:var(--gold);color:var(--navy);">👁 Testar como cliente</button>
+          <button class="copy-btn" id="shareWA" style="background:#25D366;">💬 Mandar no WhatsApp</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('copyLink').addEventListener('click', e => {
+      navigator.clipboard.writeText(link).then(() => {
+        e.target.classList.add('copied');
+        e.target.textContent = '✓ Copiado!';
+        setTimeout(() => {
+          e.target.classList.remove('copied');
+          e.target.textContent = '📋 Copiar link';
+        }, 2000);
+      });
+    });
+
+    document.getElementById('testLink').addEventListener('click', () => {
+      window.location.href = linkTeste;
+    });
+
+    document.getElementById('shareWA').addEventListener('click', () => {
+      const msg = `Oi! Fiz um simulador rápido aqui pra você descobrir quanto você consegue financiar pela Caixa (MCMV em Uberlândia). É grátis e leva 1 minuto:\n\n${link}\n\nQualquer dúvida me chama!`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+  });
+}
+
+/* =====================================================================
+   TELA DO CLIENTE — CALCULADORA
+   ===================================================================== */
+
+function renderCliente(){
+  const progress = Array.from({length: STEPS_TOTAL}, (_, i) => {
+    if (i < state.step) return '<div class="progress-step done"></div>';
+    if (i === state.step) return '<div class="progress-step current"></div>';
+    return '<div class="progress-step"></div>';
+  }).join('');
+
+  let content;
+  if (state.step === 0) content = stepNome();
+  else if (state.step === 1) content = stepAnoNasc();
+  else if (state.step === 2) content = stepRenda();
+  else if (state.step === 3) content = stepCotista();
+  else if (state.step === 4) content = stepDependente();
+  else content = stepResultado();
+
+  document.getElementById('app').innerHTML = `
+    <div class="brand fade-in">
+      <div class="brand-mark">T</div>
+      <div>
+        <div class="brand-name">${state.corretorName || 'Corretor parceiro'}</div>
+        <div class="brand-sub">Simulação MCMV grátis · Caixa</div>
+      </div>
+    </div>
+
+    ${state.step < STEPS_TOTAL ? `<div class="progress">${progress}</div>` : ''}
+
+    <div class="card fade-in" key="step-${state.step}">
+      ${content}
+    </div>
+
+    <div class="foot">
+      Tabela MCMV 04/2026 · Imóvel na planta · 420 meses · Uberlândia/MG<br>
+      <small>Valores aproximados. Análise definitiva pela Caixa Econômica.</small>
+    </div>
+  `;
+
+  attachStepListeners();
+}
+
+function stepNome(){
+  return `
+    <h2 class="display">Oi! Vamos fazer sua simulação 👋</h2>
+    <p class="lead">Em 4 perguntas rápidas você descobre quanto a Caixa libera pra você, o subsídio que você tem direito e a parcela. Sem compromisso, sem cadastro chato.</p>
+
+    <div style="margin-bottom:20px;">
+      <label for="nomeCli">Como posso te chamar?</label>
+      <input type="text" id="nomeCli" placeholder="Seu primeiro nome" value="${state.nome}" autocomplete="given-name" autofocus />
+    </div>
+
+    <button class="btn btn-primary" data-action="next-nome">Começar →</button>
+  `;
+}
+
+function stepAnoNasc(){
+  const anoAtual = new Date().getFullYear();
+  return `
+    <h2 class="display">${state.nome ? `Prazer, ${state.nome}!` : 'Beleza.'}<br>Em que ano você nasceu?</h2>
+    <p class="lead">A Caixa financia até os <strong>80 anos e 2 meses</strong> de idade. Pela sua idade eu calculo o prazo certo do contrato.</p>
+
+    <div style="margin-bottom:20px;">
+      <label for="anoNascCli">Ano de nascimento</label>
+      <input type="tel" id="anoNascCli" placeholder="${anoAtual - 35}" value="${state.anoNasc || ''}" inputmode="numeric" maxlength="4" autofocus />
+      <div class="hint">4 dígitos. Ex: 1985</div>
+      <div id="idadePreview" style="margin-top:8px;font-size:13px;color:var(--gold-dark);font-weight:600;"></div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost" data-action="back">← Voltar</button>
+      <button class="btn btn-primary" data-action="next-ano" ${state.anoNasc ? '' : 'disabled'}>Próximo →</button>
+    </div>
+  `;
+}
+
+function stepRenda(){
+  return `
+    <h2 class="display">${state.nome ? `Beleza, ${state.nome}.` : 'Beleza.'}<br>Qual a renda da sua família?</h2>
+    <p class="lead">Some sua renda + de quem vai entrar no financiamento (cônjuge, pai, mãe, irmão). É o valor bruto, antes dos descontos.</p>
+
+    <div style="margin-bottom:20px;">
+      <label for="rendaCli">Renda familiar mensal (R$)</label>
+      <input type="tel" id="rendaCli" placeholder="3.500" value="${state.renda ? state.renda.toLocaleString('pt-BR') : ''}" inputmode="numeric" autofocus />
+      <div class="hint">Use só números. Ex: 3500</div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost" data-action="back">← Voltar</button>
+      <button class="btn btn-primary" data-action="next-renda">Próximo →</button>
+    </div>
+  `;
+}
+
+function stepCotista(){
+  return `
+    <h2 class="display">Você tem FGTS<br>com mais de 3 anos?</h2>
+    <p class="lead">Conta carteira assinada por <strong>36 meses ou mais</strong> (somando todos os empregos da vida). Quem tem, paga juros mais baixos.</p>
+
+    <div class="choices" style="margin-bottom:20px;">
+      <div class="choice ${state.cotista === true ? 'active' : ''}" data-cotista="true">
+        Sim, tenho<small>+ de 3 anos de carteira</small>
+      </div>
+      <div class="choice ${state.cotista === false ? 'active' : ''}" data-cotista="false">
+        Não tenho<small>Nunca tive ou foi pouco tempo</small>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost" data-action="back">← Voltar</button>
+      <button class="btn btn-primary" data-action="next-cotista" ${state.cotista === null ? 'disabled' : ''}>Próximo →</button>
+    </div>
+  `;
+}
+
+function stepDependente(){
+  return `
+    <h2 class="display">Tem filhos<br>ou dependentes?</h2>
+    <p class="lead">Filho, enteado ou outro dependente declarado no Imposto de Renda. Com dependente o <strong>subsídio é bem maior</strong>.</p>
+
+    <div class="choices" style="margin-bottom:20px;">
+      <div class="choice ${state.dependente === true ? 'active' : ''}" data-dep="true">
+        Sim, tenho<small>Aumenta o subsídio</small>
+      </div>
+      <div class="choice ${state.dependente === false ? 'active' : ''}" data-dep="false">
+        Não tenho<small>Subsídio menor</small>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost" data-action="back">← Voltar</button>
+      <button class="btn btn-primary" data-action="ver-resultado" ${state.dependente === null ? 'disabled' : ''}>Ver resultado →</button>
+    </div>
+  `;
+}
+
+function stepResultado(){
+  const r = calcular();
+  const linha = r.linha;
+  const imovelMax = r.imovelMax;
+  const totalCompra = linha.f + linha.s;
+  const entradaMin = Math.max(0, imovelMax - totalCompra);
+
+  // Caso especial: idade não permite financiar
+  if (r.prazoUsado <= 0){
+    return `
+      <div class="result-hero" style="background:linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);">
+        <div class="label" style="color:#fff;">Não foi possível simular</div>
+        <div class="value" style="font-size:24px;">Idade fora da regra Caixa</div>
+        <div class="sub">${r.idadeAtual} anos completados em ${new Date().getFullYear()}</div>
+      </div>
+      <div class="summary">
+        Pela regra da Caixa, o contrato precisa ser quitado até os <strong>80 anos e 2 meses</strong> do tomador. Com sua idade atual, isso deixaria menos de 0 meses pra pagar — o que inviabiliza o financiamento direto.
+        <br><br>
+        <strong>Saída comum:</strong> trazer um <strong>2º proponente</strong> mais novo (cônjuge, filho maior, irmão) com renda comprovada. Aí a Caixa usa a idade do mais novo pra calcular o prazo.
+      </div>
+      <a href="https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(`Oi! Tentei simular mas minha idade não bate na regra da Caixa (${r.idadeAtual} anos). Como faço com 2º proponente?`)}" target="_blank" rel="noopener" class="btn btn-whats">
+        💬 Falar com o corretor
+      </a>
+      <button class="restart" data-action="reset">← Refazer com outros dados</button>
+    `;
+  }
+
+  const anosPrazo = Math.floor(r.prazoUsado / 12);
+  const mesesExtras = r.prazoUsado % 12;
+  const prazoLabel = r.prazoUsado >= PRAZO_PADRAO_MESES
+    ? '35 anos (420x)'
+    : `${anosPrazo}${mesesExtras ? ' anos e ' + mesesExtras + ' meses' : ' anos'} (${r.prazoUsado}x)`;
+
+  // monta mensagem do WhatsApp — varia conforme modo (corretor parceiro ou suporte direto)
+  const partes = [];
+  if (state.modoSuporte){
+    partes.push(`Oi Marco! Acabei de fazer a simulação no seu site e queria tirar uma dúvida.`);
+    if (state.nome) partes.push(`\nMeu nome é ${state.nome}.`);
+  } else {
+    partes.push(`Oi ${state.corretorName ? state.corretorName.split(' ')[0] : ''}! Fiz a simulação MCMV no site.`);
+    if (state.nome) partes.push(`\nMeu nome é ${state.nome}.`);
+  }
+  partes.push(`\n\n*Meu perfil:*`);
+  partes.push(`• Idade: ${r.idadeAtual} anos`);
+  partes.push(`• Renda familiar: R$ ${state.renda.toLocaleString('pt-BR')}`);
+  if (!state.classeAlta){
+    partes.push(`• FGTS +3 anos: ${state.cotista ? 'Sim' : 'Não'}`);
+    partes.push(`• Dependente: ${state.dependente ? 'Sim' : 'Não'}`);
+  }
+  partes.push(`\n*Resultado da simulação:*`);
+  partes.push(`💰 Financiamento: R$ ${formatBRL(linha.f)}`);
+  if (linha.s > 0) partes.push(`🎁 Subsídio Caixa: R$ ${formatBRL(linha.s)}`);
+  partes.push(`📅 Parcela: R$ ${formatBRL(linha.p)}`);
+  partes.push(`⏱ Prazo: ${prazoLabel}`);
+  partes.push(`📊 Taxa: ${linha.t.toString().replace('.',',')}% ao ano`);
+  partes.push(`🏠 Imóvel até: R$ ${formatBRLCurto(imovelMax)}`);
+  if (state.modoSuporte){
+    partes.push(`\nPode me ajudar com os próximos passos?`);
+  } else {
+    partes.push(`\nQuero falar sobre os imóveis disponíveis. Pode me passar as opções?`);
+  }
+
+  const msgWhats = partes.join('\n').replace(/\n+/g,'\n');
+  const linkWhats = `https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(msgWhats)}`;
+
+  let perfilLabel = '';
+  if (state.classeAlta) perfilLabel = 'Classe Média — sem subsídio MCMV';
+  else {
+    const cot = state.cotista ? 'Cotista FGTS' : 'Não cotista';
+    const dep = state.dependente ? 'com dependente' : 'sem dependente';
+    perfilLabel = `${cot} · ${dep}`;
+  }
+
+  // Alerta caso o prazo tenha sido reduzido por idade
+  const alertaPrazo = r.prazoAjustado ? `
+    <div class="summary" style="border-left:3px solid var(--gold);background:#fff8e1;">
+      ⚠️ <strong>Prazo reduzido pela idade.</strong> Como você tem ${r.idadeAtual} anos, a Caixa só pode financiar por ${prazoLabel} (em vez dos 35 anos). Isso reduziu o valor que você pode tomar de R$ ${formatBRL(linha.fOriginal)} para R$ ${formatBRL(linha.f)}.
+      <br><br>
+      <strong>Quer aumentar?</strong> Inclua um 2º proponente mais novo (cônjuge, filho ou parente com renda).
+    </div>
+  ` : '';
+
+  // Label do CTA varia conforme modo
+  const ctaLabelTop = state.modoSuporte
+    ? '💬 Falar com o corretor agora'
+    : `💬 Mandar resultado pro ${state.corretorName ? state.corretorName.split(' ')[0] : 'corretor'}`;
+  const ctaSubTop = state.modoSuporte
+    ? 'Tira-dúvidas no WhatsApp · Marco Túlio'
+    : 'Receba as opções de imóveis no WhatsApp';
+
+  return `
+    <div class="result-hero">
+      <div class="label">Você pode financiar até</div>
+      <div class="value"><span class="currency">R$</span>${formatBRL(linha.f)}</div>
+      <div class="sub">${perfilLabel} · ${prazoLabel}</div>
+
+      <a href="${linkWhats}" target="_blank" rel="noopener" class="hero-cta">
+        ${ctaLabelTop}
+      </a>
+      <span class="hero-cta-sub">${ctaSubTop}</span>
+    </div>
+
+    <div class="result-grid">
+      ${linha.s > 0 ? `
+      <div class="result-item highlight">
+        <div class="label">🎁 Subsídio Caixa</div>
+        <div class="value">R$ ${formatBRL(linha.s)}</div>
+      </div>` : `
+      <div class="result-item">
+        <div class="label">🎁 Subsídio</div>
+        <div class="value">—</div>
+      </div>`}
+
+      <div class="result-item">
+        <div class="label">📅 Parcela mensal</div>
+        <div class="value">R$ ${formatBRL(linha.p)}</div>
+      </div>
+
+      <div class="result-item">
+        <div class="label">📊 Taxa de juros</div>
+        <div class="value">${linha.t.toString().replace('.',',')}% a.a.</div>
+      </div>
+
+      <div class="result-item">
+        <div class="label">🏠 Imóvel até</div>
+        <div class="value">R$ ${formatBRLCurto(imovelMax)}</div>
+      </div>
+    </div>
+
+    ${alertaPrazo}
+
+    <div class="summary">
+      <strong>Resumo:</strong> Com sua renda de R$ ${state.renda.toLocaleString('pt-BR')} e ${r.idadeAtual} anos, ${linha.s > 0 ? `você ganha um subsídio de <strong>R$ ${formatBRL(linha.s)}</strong> da Caixa que não precisa devolver. ` : ''}Somando financiamento + subsídio, você compra um imóvel de até <strong>R$ ${formatBRLCurto(totalCompra)}</strong>${entradaMin > 0 ? ` (com entrada de ~R$ ${formatBRLCurto(entradaMin)} pra chegar no teto de R$ ${formatBRLCurto(imovelMax)})` : ''}.
+    </div>
+
+    <div style="margin:20px 0 8px;font-size:13px;font-weight:600;color:var(--navy);">
+      💬 ${state.modoSuporte ? 'Mande essa simulação pro corretor:' : 'Próximo passo — mandar pro corretor:'}
+    </div>
+    <div class="whats-preview">${msgWhats}</div>
+
+    <a href="${linkWhats}" target="_blank" rel="noopener" class="btn btn-whats" id="abrirWhats">
+      💬 Falar agora no WhatsApp
+    </a>
+
+    <div class="note">
+      ⚠️ Valores aproximados baseados na tabela Caixa de 04/2026 (imóvel na planta, prazo padrão de 420 meses). Para idades acima de 45 anos o prazo é ajustado proporcionalmente. A análise definitiva é feita pelo banco com sua documentação. O subsídio depende de não ter outro imóvel financiado pelo SFH.
+    </div>
+
+    <a href="${linkWhats}" target="_blank" rel="noopener" class="btn btn-whats" style="margin-top:14px;" id="abrirWhatsFim">
+      💬 Tirar dúvida no WhatsApp
+    </a>
+
+    <button class="restart" data-action="reset">← Refazer simulação</button>
+  `;
+}
+
+/* =====================================================================
+   LISTENERS DOS STEPS
+   ===================================================================== */
+
+function attachStepListeners(){
+  // Step 0 - nome
+  const btnNome = document.querySelector('[data-action="next-nome"]');
+  if (btnNome){
+    const inputNome = document.getElementById('nomeCli');
+    inputNome.addEventListener('keydown', e => {
+      if (e.key === 'Enter') btnNome.click();
+    });
+    btnNome.addEventListener('click', () => {
+      state.nome = inputNome.value.trim();
+      state.step = 1;
+      renderCliente();
+    });
+  }
+
+  // Step 1 - ano de nascimento
+  const btnAno = document.querySelector('[data-action="next-ano"]');
+  if (btnAno){
+    const inputAno = document.getElementById('anoNascCli');
+    const previewEl = document.getElementById('idadePreview');
+    const anoAtual = new Date().getFullYear();
+
+    const atualizarPreview = () => {
+      const ano = parseInt(onlyDigits(inputAno.value), 10);
+      if (!ano || ano < 1925 || ano > anoAtual - 18){
+        previewEl.textContent = '';
+        previewEl.style.color = 'var(--gold-dark)';
+        btnAno.disabled = true;
+        return;
+      }
+      const idade = anoAtual - ano;
+      const prazoMax = calcularPrazoMaxPorIdade(ano);
+      const anosPrazo = Math.floor(prazoMax / 12);
+      const mesesExtras = prazoMax % 12;
+
+      btnAno.disabled = false;
+
+      if (prazoMax <= 0){
+        previewEl.textContent = `⚠️ Com ${idade} anos, pela regra da Caixa não dá pra financiar.`;
+        previewEl.style.color = 'var(--danger)';
+        btnAno.disabled = true;
+        return;
+      }
+      if (prazoMax >= PRAZO_PADRAO_MESES){
+        previewEl.textContent = `✓ ${idade} anos — prazo cheio de 35 anos (420x)`;
+        previewEl.style.color = 'var(--success)';
+      } else {
+        previewEl.innerHTML = `⚠️ ${idade} anos — prazo limitado a <strong>${anosPrazo} anos${mesesExtras ? ` e ${mesesExtras} meses` : ''}</strong> (${prazoMax}x). O financiamento será menor.`;
+        previewEl.style.color = 'var(--gold-dark)';
+      }
+    };
+
+    inputAno.addEventListener('input', e => {
+      e.target.value = onlyDigits(e.target.value).slice(0,4);
+      atualizarPreview();
+    });
+    inputAno.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !btnAno.disabled) btnAno.click();
+    });
+
+    if (state.anoNasc) atualizarPreview();
+    else btnAno.disabled = true;
+
+    btnAno.addEventListener('click', () => {
+      const ano = parseInt(onlyDigits(inputAno.value), 10);
+      if (!ano || ano < 1925 || ano > anoAtual - 18){
+        inputAno.classList.add('shake');
+        setTimeout(()=>inputAno.classList.remove('shake'), 400);
+        return;
+      }
+      state.anoNasc = ano;
+      state.step = 2;
+      renderCliente();
+    });
+  }
+
+  // Step 2 - renda
+  const btnRenda = document.querySelector('[data-action="next-renda"]');
+  if (btnRenda){
+    const inputRenda = document.getElementById('rendaCli');
+    inputRenda.addEventListener('input', e => {
+      e.target.value = formatRenda(e.target.value);
+    });
+    inputRenda.addEventListener('keydown', e => {
+      if (e.key === 'Enter') btnRenda.click();
+    });
+    btnRenda.addEventListener('click', () => {
+      const renda = parseInt(onlyDigits(inputRenda.value), 10);
+      if (!renda || renda < 1000){
+        inputRenda.classList.add('shake');
+        setTimeout(()=>inputRenda.classList.remove('shake'), 400);
+        return;
+      }
+      state.renda = renda;
+      // Se renda >= 10k, pula direto pro resultado (classe média)
+      if (renda >= 10000){
+        state.classeAlta = true;
+        state.step = STEPS_TOTAL;
+      } else {
+        state.step = 3;
+      }
+      renderCliente();
+    });
+  }
+
+  // Step 3 - cotista
+  document.querySelectorAll('[data-cotista]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.cotista = el.dataset.cotista === 'true';
+      document.querySelectorAll('[data-cotista]').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelector('[data-action="next-cotista"]').disabled = false;
+    });
+  });
+  const btnCotista = document.querySelector('[data-action="next-cotista"]');
+  if (btnCotista){
+    btnCotista.addEventListener('click', () => {
+      if (state.cotista === null) return;
+      state.step = 4;
+      renderCliente();
+    });
+  }
+
+  // Step 4 - dependente
+  document.querySelectorAll('[data-dep]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.dependente = el.dataset.dep === 'true';
+      document.querySelectorAll('[data-dep]').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelector('[data-action="ver-resultado"]').disabled = false;
+    });
+  });
+  const btnVer = document.querySelector('[data-action="ver-resultado"]');
+  if (btnVer){
+    btnVer.addEventListener('click', () => {
+      if (state.dependente === null) return;
+      state.step = STEPS_TOTAL;
+      renderCliente();
+    });
+  }
+
+  // Voltar
+  document.querySelectorAll('[data-action="back"]').forEach(el => {
+    el.addEventListener('click', () => {
+      if (state.step > 0){
+        state.step -= 1;
+        renderCliente();
+      }
+    });
+  });
+
+  // Reset
+  const btnReset = document.querySelector('[data-action="reset"]');
+  if (btnReset){
+    btnReset.addEventListener('click', () => {
+      state.step = 0;
+      state.nome = '';
+      state.anoNasc = null;
+      state.cotista = null;
+      state.dependente = null;
+      state.renda = null;
+      state.classeAlta = false;
+      renderCliente();
+    });
+  }
+}
+
+// Inicializa
+init();
+</script>
+</body>
+</html>
