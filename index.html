@@ -170,38 +170,77 @@
     letter-spacing:0.02em;
   }
 
-  /* DIVIDER "ou" entre o form do corretor e o atalho do cliente */
-  .divider{
-    position:relative;text-align:center;
-    margin:22px 0 18px;
-    font-size:11px;color:var(--muted);font-weight:600;
-    letter-spacing:0.12em;text-transform:uppercase;
+  /* BOTÃO FLUTUANTE — simulação rápida, sem digitar nome (uso pessoal do Marco) */
+  .quick-fab{
+    position:fixed;
+    right:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom));
+    z-index:60;
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--navy);color:#fff;
+    border:1px solid rgba(255,255,255,.16);
+    padding:10px 15px;border-radius:999px;
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:13px;
+    letter-spacing:-0.01em;
+    box-shadow:0 10px 28px -10px rgba(15,36,68,.6);
+    cursor:pointer;opacity:.92;
+    transition:opacity .15s, transform .08s, box-shadow .15s;
   }
-  .divider::before{
-    content:'';position:absolute;left:0;right:0;top:50%;
-    height:1px;background:var(--border);z-index:0;
-  }
-  .divider span{
-    position:relative;z-index:1;
-    background:var(--card);
-    padding:0 12px;
-  }
+  .quick-fab:hover{opacity:1;box-shadow:0 14px 32px -10px rgba(15,36,68,.7);}
+  .quick-fab:active{transform:translateY(1px);}
+  .quick-fab .bolt{color:var(--gold);font-size:14px;line-height:1;}
 
-  /* Atalho "É cliente?" no painel do corretor */
-  .client-shortcut{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;
-    background:linear-gradient(135deg, #fffbef 0%, #fff5d6 100%);
+  /* INDICAR PARA UM AMIGO */
+  .btn-share{
+    background:#fff;color:var(--navy);
+    border:1.5px solid var(--gold);
+  }
+  .btn-share:hover{background:#fffbef;border-color:var(--gold-dark);}
+
+  .share-block{
+    margin-top:18px;
+    background:linear-gradient(135deg,#fffbef 0%, #fff5d6 100%);
     border:1.5px solid #f0d780;
-    border-radius:14px;
-    padding:14px 16px;
-    margin-bottom:8px;
+    border-radius:16px;
+    padding:18px 16px;
+    text-align:center;
   }
-  .client-shortcut-text{font-size:13px;line-height:1.4;color:var(--navy);}
-  .client-shortcut-text strong{font-size:14px;font-weight:700;}
-  .client-shortcut-text span{font-size:12px;color:var(--muted);font-weight:500;}
-  @media (max-width:380px){
-    .client-shortcut{flex-direction:column;align-items:stretch;text-align:center;}
+  .share-block h3{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;
+    color:var(--navy);margin-bottom:4px;letter-spacing:-0.01em;
   }
+  .share-block p{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:13px;}
+
+  /* TEASER SORTEIO (campanha futura) */
+  .raffle-teaser{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:13px;
+    background:var(--navy);color:#fff;
+    font-size:11px;font-weight:600;letter-spacing:0.02em;
+    padding:6px 13px;border-radius:999px;
+  }
+  .raffle-teaser .spark{color:var(--gold);}
+
+  /* link discreto de indicação na primeira tela */
+  .share-inline{
+    display:block;width:100%;text-align:center;
+    margin-top:18px;font-size:13px;color:var(--muted);
+    background:none;border:none;cursor:pointer;font-family:inherit;
+    text-decoration:underline;text-underline-offset:3px;
+  }
+  .share-inline:hover{color:var(--navy);}
+
+  /* selo de confiança na abertura */
+  .trust-row{
+    display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;
+  }
+  .trust-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#fafaf7;border:1px solid var(--border);
+    border-radius:999px;padding:6px 12px;
+    font-size:12px;font-weight:600;color:var(--navy);
+  }
+  .trust-pill .ico{color:var(--gold-dark);}
 
   .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
   .result-item{
@@ -589,7 +628,8 @@ const state = {
   mode: null,           // 'corretor' | 'cliente'
   corretorPhone: null,  // só dígitos
   corretorName: null,
-  modoSuporte: false,   // true quando cliente entra direto sem link de corretor
+  modoSuporte: false,   // true quando o WhatsApp final cai no Marco (padrão)
+  quick: false,         // true quando entra pela "simulação rápida" (pula o nome)
   // dados da calculadora
   step: 0,
   nome: '',
@@ -736,155 +776,47 @@ function init(){
   const w = onlyDigits(params.get('w') || '');
   const n = params.get('n') || '';
 
-  if (w && w.length >= 10){
-    state.mode = 'cliente';
+  // A ferramenta é do Marco Túlio: quem abrir já cai direto na simulação
+  // e o WhatsApp final sempre vai pra ele. Links antigos de parceiro
+  // (?w=outro número) continuam funcionando e direcionam pra esse número.
+  if (w && w.length >= 10 && w !== SUPORTE_PHONE){
     state.corretorPhone = w;
-    state.corretorName = n || 'Marco Túlio';
-    // Marca modo suporte: cliente entrou direto pelo botão da home,
-    // sem link de corretor parceiro → conversa é "tira-dúvida", não pré-venda
-    state.modoSuporte = (w === SUPORTE_PHONE);
-    state.step = 0;
-    renderCliente();
+    state.corretorName = n || SUPORTE_NAME;
+    state.modoSuporte = false;
   } else {
-    state.mode = 'corretor';
-    renderCorretor();
+    state.corretorPhone = SUPORTE_PHONE;
+    state.corretorName = SUPORTE_NAME;
+    state.modoSuporte = true;
+  }
+
+  state.mode = 'cliente';
+  state.step = 0;
+  renderCliente();
+}
+
+/* =====================================================================
+   COMPARTILHAR COM UM AMIGO  (base da futura campanha de sorteio)
+   ===================================================================== */
+
+function shareToFriend(){
+  const url = PROD_BASE_URL;
+  const text = 'Achei esse simulador da Caixa (Minha Casa Minha Vida): em 1 minuto ele mostra quanto dá pra financiar, o subsídio que você tem direito e a parcela. Dá uma olhada 👇';
+  if (navigator.share){
+    navigator.share({title:'Simulador MCMV · Uberlândia', text, url}).catch(()=>{});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text + '\n\n' + url), '_blank');
   }
 }
 
 /* =====================================================================
-   TELA DO CORRETOR
-   ===================================================================== */
-
-function renderCorretor(){
-  const phoneInit = state.corretorPhone ? formatPhone(state.corretorPhone) : '';
-  document.getElementById('app').innerHTML = `
-    <div class="brand fade-in">
-      <div class="brand-mark">T</div>
-      <div>
-        <div class="brand-name">Torrano Imóveis</div>
-        <div class="brand-sub">Simulador MCMV · Uberlândia</div>
-      </div>
-    </div>
-
-    <div class="card fade-in">
-      <span class="badge">Painel do corretor</span>
-      <h1 class="display">Gere seu link de simulação</h1>
-      <p class="lead">Coloque seu WhatsApp e pegue um link pronto pra mandar nos contatos. O cliente faz a simulação sozinho e o botão final cai direto na sua conversa.</p>
-
-      <div style="margin-bottom:16px;">
-        <label for="nomeCorretor">Seu nome (opcional)</label>
-        <input type="text" id="nomeCorretor" placeholder="Ex: Marco Túlio" value="${state.corretorName || ''}" autocomplete="name" />
-      </div>
-
-      <div style="margin-bottom:20px;">
-        <label for="phoneCorretor">Seu WhatsApp (com DDD)</label>
-        <input type="tel" id="phoneCorretor" placeholder="(34) 99677-8075" value="${phoneInit}" autocomplete="tel" inputmode="numeric" />
-        <div class="hint">Só números. Vou formatar pra você.</div>
-      </div>
-
-      <button class="btn btn-primary" id="btnGerar">Gerar meu link →</button>
-
-      <div id="linkResult"></div>
-
-      <div class="divider"><span>ou</span></div>
-
-      <div class="client-shortcut">
-        <div class="client-shortcut-text">
-          <strong>É cliente?</strong><br>
-          <span>Quer só simular seu financiamento agora?</span>
-        </div>
-        <a href="?w=${SUPORTE_PHONE}&n=${encodeURIComponent(SUPORTE_NAME)}" class="btn btn-gold" style="text-decoration:none;width:auto;padding:12px 18px;font-size:14px;">
-          Simular agora →
-        </a>
-      </div>
-
-      <div class="note">
-        💡 Dica: salve esse link e use ele em todos os disparos. Você pode até gerar um QR Code dele pra colocar no carro, fachada e cartão de visita.
-      </div>
-    </div>
-
-    <div class="foot">
-      © Torrano Imóveis · CRECI PJ 7469 · Uberlândia/MG<br>
-      Tabela MCMV 04/2026 · Imóvel na planta · até 420 meses<br>
-      <a href="${PROD_BASE_URL}" target="_blank">simulador.marcotulio.pro</a>
-    </div>
-  `;
-
-  const phoneInput = document.getElementById('phoneCorretor');
-  phoneInput.addEventListener('input', e => {
-    const cursorAtEnd = e.target.selectionStart === e.target.value.length;
-    e.target.value = formatPhone(e.target.value);
-    if (cursorAtEnd) e.target.setSelectionRange(e.target.value.length, e.target.value.length);
-  });
-
-  document.getElementById('btnGerar').addEventListener('click', () => {
-    const phone = onlyDigits(phoneInput.value);
-    const nome = document.getElementById('nomeCorretor').value.trim();
-
-    if (phone.length < 10 || phone.length > 13){
-      phoneInput.classList.add('shake');
-      setTimeout(()=>phoneInput.classList.remove('shake'), 400);
-      phoneInput.focus();
-      return;
-    }
-
-    // Adiciona 55 (Brasil) se ainda não tiver
-    let phoneFull = phone;
-    if (!phoneFull.startsWith('55')) phoneFull = '55' + phoneFull;
-
-    state.corretorPhone = phoneFull;
-    state.corretorName = nome;
-
-    // Link compartilhável sempre aponta pro domínio de produção
-    const params = new URLSearchParams();
-    params.set('w', phoneFull);
-    if (nome) params.set('n', nome);
-    const link = PROD_BASE_URL + '?' + params.toString();
-
-    // Link de teste usa o host atual (pra preview/dev funcionar)
-    const linkTeste = window.location.origin + window.location.pathname + '?' + params.toString();
-
-    document.getElementById('linkResult').innerHTML = `
-      <div class="fade-in" style="margin-top:20px;">
-        <label style="color:var(--success);">✓ Link gerado</label>
-        <div class="link-box">${link}</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="copy-btn" id="copyLink">📋 Copiar link</button>
-          <button class="copy-btn" id="testLink" style="background:var(--gold);color:var(--navy);">👁 Testar como cliente</button>
-          <button class="copy-btn" id="shareWA" style="background:#25D366;">💬 Mandar no WhatsApp</button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('copyLink').addEventListener('click', e => {
-      navigator.clipboard.writeText(link).then(() => {
-        e.target.classList.add('copied');
-        e.target.textContent = '✓ Copiado!';
-        setTimeout(() => {
-          e.target.classList.remove('copied');
-          e.target.textContent = '📋 Copiar link';
-        }, 2000);
-      });
-    });
-
-    document.getElementById('testLink').addEventListener('click', () => {
-      window.location.href = linkTeste;
-    });
-
-    document.getElementById('shareWA').addEventListener('click', () => {
-      const msg = `Oi! Fiz um simulador rápido aqui pra você descobrir quanto você consegue financiar pela Caixa (MCMV em Uberlândia). É grátis e leva 1 minuto:\n\n${link}\n\nQualquer dúvida me chama!`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-    });
-  });
-}
-
-/* =====================================================================
-   TELA DO CLIENTE — CALCULADORA
+   SIMULAÇÃO — CALCULADORA
    ===================================================================== */
 
 function renderCliente(){
   const progress = Array.from({length: STEPS_TOTAL}, (_, i) => {
-    if (i < state.step) return '<div class="progress-step done"></div>';
+    // No modo rápido o passo do nome é pulado, então já entra como concluído.
+    const skippedNome = state.quick && i === 0;
+    if (i < state.step || skippedNome) return '<div class="progress-step done"></div>';
     if (i === state.step) return '<div class="progress-step current"></div>';
     return '<div class="progress-step"></div>';
   }).join('');
@@ -897,12 +829,21 @@ function renderCliente(){
   else if (state.step === 4) content = stepDependente();
   else content = stepResultado();
 
+  // Marca: por padrão é o Marco Túlio (dono da ferramenta). Se o visitante
+  // chegou por um link antigo de parceiro, mostra o nome do parceiro.
+  const brandName = state.modoSuporte ? 'Marco Túlio' : (state.corretorName || 'Corretor parceiro');
+  const brandMark = (brandName.trim()[0] || 'M').toUpperCase();
+  const brandSub = state.modoSuporte ? 'Simulador MCMV · Uberlândia' : 'Simulação MCMV · Caixa';
+
+  // Botão flutuante de simulação rápida (some na tela de resultado).
+  const showFab = state.step < STEPS_TOTAL;
+
   document.getElementById('app').innerHTML = `
     <div class="brand fade-in">
-      <div class="brand-mark">T</div>
+      <div class="brand-mark">${brandMark}</div>
       <div>
-        <div class="brand-name">${state.corretorName || 'Corretor parceiro'}</div>
-        <div class="brand-sub">Simulação MCMV grátis · Caixa</div>
+        <div class="brand-name">${brandName}</div>
+        <div class="brand-sub">${brandSub}</div>
       </div>
     </div>
 
@@ -913,9 +854,14 @@ function renderCliente(){
     </div>
 
     <div class="foot">
-      Tabela MCMV 04/2026 · Imóvel na planta · 420 meses · Uberlândia/MG<br>
-      <small>Valores aproximados. Análise definitiva pela Caixa Econômica.</small>
+      Tabela MCMV 04/2026 · Imóvel na planta · até 420 meses · Uberlândia/MG<br>
+      <small>Valores aproximados. Análise definitiva pela Caixa Econômica Federal.</small>
     </div>
+
+    ${showFab ? `
+    <button class="quick-fab" data-action="quick-sim" title="Começar uma simulação sem digitar nome">
+      <span class="bolt">⚡</span> Simulação rápida
+    </button>` : ''}
   `;
 
   attachStepListeners();
@@ -923,15 +869,24 @@ function renderCliente(){
 
 function stepNome(){
   return `
-    <h2 class="display">Oi! Vamos fazer sua simulação 👋</h2>
-    <p class="lead">Em 4 perguntas rápidas você descobre quanto a Caixa libera pra você, o subsídio que você tem direito e a parcela. Sem compromisso, sem cadastro chato.</p>
+    <span class="badge">Minha Casa Minha Vida · Caixa</span>
+    <h1 class="display">Descubra em 1 minuto quanto você pode financiar.</h1>
+    <p class="lead">Responda 4 perguntas e veja na hora o valor do financiamento, o subsídio que a Caixa te dá e quanto fica a parcela. De graça e sem cadastro.</p>
+
+    <div class="trust-row">
+      <span class="trust-pill"><span class="ico">⏱</span> Leva 1 minuto</span>
+      <span class="trust-pill"><span class="ico">🎁</span> Mostra seu subsídio</span>
+      <span class="trust-pill"><span class="ico">🔒</span> Sem cadastro</span>
+    </div>
 
     <div style="margin-bottom:20px;">
       <label for="nomeCli">Como posso te chamar?</label>
       <input type="text" id="nomeCli" placeholder="Seu primeiro nome" value="${state.nome}" autocomplete="given-name" autofocus />
     </div>
 
-    <button class="btn btn-primary" data-action="next-nome">Começar →</button>
+    <button class="btn btn-primary" data-action="next-nome">Começar simulação →</button>
+
+    <button class="share-inline" data-action="share">Conhece alguém querendo a casa própria? Indique →</button>
   `;
 }
 
@@ -1099,10 +1054,10 @@ function stepResultado(){
 
   // Label do CTA varia conforme modo
   const ctaLabelTop = state.modoSuporte
-    ? '💬 Falar com o corretor agora'
+    ? '💬 Falar com Marco Túlio'
     : `💬 Mandar resultado pro ${state.corretorName ? state.corretorName.split(' ')[0] : 'corretor'}`;
   const ctaSubTop = state.modoSuporte
-    ? 'Tira-dúvidas no WhatsApp · Marco Túlio'
+    ? 'Tire suas dúvidas direto no WhatsApp'
     : 'Receba as opções de imóveis no WhatsApp';
 
   return `
@@ -1160,12 +1115,15 @@ function stepResultado(){
     </a>
 
     <div class="note">
-      ⚠️ Valores aproximados baseados na tabela Caixa de 04/2026 (imóvel na planta, prazo padrão de 420 meses). Para idades acima de 45 anos o prazo é ajustado proporcionalmente. A análise definitiva é feita pelo banco com sua documentação. O subsídio depende de não ter outro imóvel financiado pelo SFH.
+      ⚠️ Valores aproximados baseados na tabela Caixa de 04/2026 (imóvel na planta, prazo padrão de 420 meses). Para idades mais altas o prazo é ajustado proporcionalmente. A análise definitiva é feita pelo banco com sua documentação. O subsídio depende de não ter outro imóvel financiado pelo SFH.
     </div>
 
-    <a href="${linkWhats}" target="_blank" rel="noopener" class="btn btn-whats" style="margin-top:14px;" id="abrirWhatsFim">
-      💬 Tirar dúvida no WhatsApp
-    </a>
+    <div class="share-block">
+      <h3>Curtiu? Manda pra um amigo 💛</h3>
+      <p>Quem está pensando em comprar a casa própria vai gostar de descobrir o número dele também.</p>
+      <button class="btn btn-share" data-action="share">📲 Indicar para um amigo</button>
+      <div class="raffle-teaser"><span class="spark">🎉</span> Em breve: indique e concorra a prêmios</div>
+    </div>
 
     <button class="restart" data-action="reset">← Refazer simulação</button>
   `;
@@ -1337,9 +1295,31 @@ function attachStepListeners(){
       state.dependente = null;
       state.renda = null;
       state.classeAlta = false;
+      state.quick = false;
       renderCliente();
     });
   }
+
+  // Botão flutuante — simulação rápida (zera tudo e pula o nome)
+  const btnQuick = document.querySelector('[data-action="quick-sim"]');
+  if (btnQuick){
+    btnQuick.addEventListener('click', () => {
+      state.nome = '';
+      state.anoNasc = null;
+      state.cotista = null;
+      state.dependente = null;
+      state.renda = null;
+      state.classeAlta = false;
+      state.quick = true;
+      state.step = 1;   // pula direto pro ano de nascimento
+      renderCliente();
+    });
+  }
+
+  // Indicar para um amigo (aparece na abertura e no resultado)
+  document.querySelectorAll('[data-action="share"]').forEach(el => {
+    el.addEventListener('click', shareToFriend);
+  });
 }
 
 // Inicializa
