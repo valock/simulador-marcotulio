@@ -11,8 +11,11 @@ Simulador de financiamento imobiliário (Caixa / Minha Casa Minha Vida) para Ube
 - **Indicar para um amigo.** Botão de compartilhamento (Web Share API, com fallback para WhatsApp) na abertura e no resultado. Base para uma futura **campanha de sorteio** (já há um teaser "indique e concorra a prêmios").
 - **Compatibilidade.** Links antigos de parceiro (`?w=telefone&n=nome`) continuam funcionando e direcionam o contato para aquele número.
 
+## Preview no WhatsApp / redes (Open Graph)
+O `index.html` aponta para `https://simulador.marcotulio.pro/ogimage.png`. Para a foto aparecer ao compartilhar o link, o arquivo **`ogimage.png`** (1200×630) precisa estar na **raiz** do repositório, junto do `index.html`, para ser incluído no deploy automático do Netlify (evitando que uploads manuais sejam sobrescritos).
+
 ## Stack
-Site estático — HTML/CSS/JS em arquivo único (`index.html`). Sem build, sem dependências.
+Site estático — HTML/CSS/JS em arquivo único (`index.html`) + `ogimage.png` (preview social). Sem build, sem dependências.
 
 ## Deploy
 Publicado no **Netlify**. Deploy automático ao dar push neste repositório (ou arraste a pasta no painel do Netlify para deploy manual).

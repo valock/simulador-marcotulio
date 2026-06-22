@@ -28,6 +28,79 @@
 <meta name="twitter:description" content="Quanto você pode financiar, o subsídio da Caixa e a parcela — em 1 minuto." />
 <meta name="twitter:image" content="https://simulador.marcotulio.pro/ogimage.png" />
 
+<!-- Google Analytics 4 — substitua G-XXXXXXXXXX pelo seu Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-XXXXXXXXXX');
+</script>
+<!-- Schema.org — WebApplication + FAQPage + BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Simulador MCMV — Uberlândia",
+  "url": "https://simulador.marcotulio.pro/",
+  "description": "Simule seu financiamento Minha Casa Minha Vida grátis. Em 4 perguntas descubra quanto você pode financiar, o subsídio da Caixa e a parcela.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web browser",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "BRL"},
+  "featureList": ["Simulação MCMV 2026", "Cálculo de subsídio Caixa", "Comparação de faixas", "Resultado via WhatsApp"],
+  "author": {
+    "@type": "Person",
+    "name": "Marco Túlio Andrade Freitas",
+    "url": "https://marcotulio.pro/sobre",
+    "jobTitle": "Corretor de Imóveis"
+  },
+  "publisher": {"@type": "Person", "name": "Marco Túlio Andrade Freitas", "url": "https://marcotulio.pro"},
+  "inLanguage": "pt-BR"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quanto eu posso financiar pelo Minha Casa Minha Vida?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Depende da sua renda familiar, FGTS, dependentes e idade. A parcela máxima é 30% da renda bruta familiar e o prazo vai até 420 meses (35 anos). Use este simulador para ver o valor exato para o seu perfil em 1 minuto."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O simulador é gratuito e sem cadastro?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim, totalmente gratuito e sem cadastro. Você responde 4 perguntas e vê na hora o financiamento, subsídio e parcela estimados com base na tabela oficial da Caixa (abril/2026)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O resultado do simulador é definitivo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O simulador usa a planilha oficial da Caixa e dá uma estimativa muito próxima do real. A análise definitiva é feita pela Caixa na aprovação de crédito. Recomendamos enviar o resultado ao corretor Marco Túlio pelo WhatsApp para confirmar os próximos passos."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "marcotulio.pro", "item": "https://marcotulio.pro/"},
+    {"@type": "ListItem", "position": 2, "name": "Simulador MCMV", "item": "https://simulador.marcotulio.pro/"}
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -396,6 +469,10 @@
 
 // Estrutura: cada item = {renda, financ, subsidio, parcela, taxa}
 // O sistema escolhe automaticamente o cenário pelo perfil
+
+function trackEvent(name, params){
+  if (typeof gtag === 'function') gtag('event', name, params || {});
+}
 
 const TABELA = {
   // COTISTA FGTS (>36 meses) + COM dependente
@@ -1166,6 +1243,7 @@ function attachStepListeners(){
     btnNome.addEventListener('click', () => {
       state.nome = inputNome.value.trim();
       state.step = 1;
+      trackEvent('simulacao_iniciada');
       renderCliente();
     });
   }
@@ -1253,6 +1331,7 @@ function attachStepListeners(){
       if (renda >= 10000){
         state.classeAlta = true;
         state.step = STEPS_TOTAL;
+        trackEvent('simulacao_concluida', {renda_familiar: renda, faixa: 'classe_media'});
       } else {
         state.step = 3;
       }
@@ -1292,6 +1371,13 @@ function attachStepListeners(){
     btnVer.addEventListener('click', () => {
       if (state.dependente === null) return;
       state.step = STEPS_TOTAL;
+      const faixaLabel = state.renda <= 3200 ? 'faixa_1' : state.renda <= 5000 ? 'faixa_2' : 'faixa_3';
+      trackEvent('simulacao_concluida', {
+        renda_familiar: state.renda,
+        faixa: faixaLabel,
+        cotista: state.cotista,
+        dependente: state.dependente,
+      });
       renderCliente();
     });
   }
@@ -1346,6 +1432,17 @@ function attachStepListeners(){
 
 // Inicializa
 init();
+
+// Rastreia cliques nos botões de WhatsApp (delegação no container)
+document.getElementById('app').addEventListener('click', function(e){
+  const link = e.target.closest('a[href*="wa.me"]');
+  if (link){
+    trackEvent('whatsapp_click', {
+      source: state.step >= STEPS_TOTAL ? 'resultado' : 'erro_idade',
+      renda_familiar: state.renda || 0,
+    });
+  }
+});
 </script>
 </body>
 </html>
