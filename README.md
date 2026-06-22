@@ -12,7 +12,7 @@ Simulador de financiamento imobiliário (Caixa / Minha Casa Minha Vida) para Ube
 - **Compatibilidade.** Links antigos de parceiro (`?w=telefone&n=nome`) continuam funcionando e direcionam o contato para aquele número.
 
 ## Preview no WhatsApp / redes (Open Graph)
-O `index.html` aponta para `https://simulador.marcotulio.pro/ogimage.png`. Para a foto aparecer ao compartilhar o link, o arquivo **`ogimage.png`** (1200×630) precisa estar na **raiz** do site, junto do `index.html`.
+O `index.html` aponta para `https://simulador.marcotulio.pro/ogimage.png`. Para a foto aparecer ao compartilhar o link, o arquivo **`ogimage.png`** (1200×630) precisa estar na **raiz** do repositório, junto do `index.html`, para ser incluído no deploy automático do Netlify (evitando que uploads manuais sejam sobrescritos).
 
 ## Stack
 Site estático — HTML/CSS/JS em arquivo único (`index.html`) + `ogimage.png` (preview social). Sem build, sem dependências.
