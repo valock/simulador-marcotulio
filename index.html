@@ -760,7 +760,8 @@ function formatBRL(v){
 }
 
 function formatBRLCurto(v){
-  if (v >= 1000000) return (v/1000000).toLocaleString('pt-BR',{maximumFractionDigits:2}) + ' mi';
+  // corte em 999.950: abaixo disso o ramo "mil" arredondaria pra "1.000 mil"
+  if (v >= 999950) return (v/1000000).toLocaleString('pt-BR',{maximumFractionDigits:2}) + ' mi';
   if (v >= 1000) return (v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mil';
   return v.toLocaleString('pt-BR',{maximumFractionDigits:0});
 }
@@ -976,8 +977,9 @@ function renderCliente(){
     </div>
 
     <div class="foot">
-      Tabela MCMV 04/2026 · Imóvel na planta · até 420 meses · Uberlândia/MG<br>
-      <small>Valores aproximados. Análise definitiva pela Caixa Econômica Federal.</small>
+      ${state.sbpe && state.step >= STEPS_TOTAL
+        ? 'Estimativa SBPE · crédito imobiliário fora do MCMV · Uberlândia/MG<br><small>Valores de referência. Condições reais definidas pelo banco na análise do perfil.</small>'
+        : 'Tabela MCMV 04/2026 · Imóvel na planta · até 420 meses · Uberlândia/MG<br><small>Valores aproximados. Análise definitiva pela Caixa Econômica Federal.</small>'}
     </div>
 
     ${showFab ? `
@@ -1040,7 +1042,7 @@ function stepRenda(){
     <div style="margin-bottom:20px;">
       <label for="rendaCli">Renda familiar mensal (R$)</label>
       <input type="tel" id="rendaCli" placeholder="3.500" value="${state.renda ? state.renda.toLocaleString('pt-BR') : ''}" inputmode="numeric" autofocus />
-      <div class="hint">Use só números. Ex: 3500 · Acima de R$ 13 mil a simulação sai pelo SBPE</div>
+      <div class="hint">Use só números. Ex: 3500 · Acima de R$ 13 mil a simulação sai pelo crédito comum (SBPE)</div>
     </div>
 
     <div class="step-nav">
@@ -1135,7 +1137,7 @@ function stepResultado(){
     partes.push(`Oi Marco! Acabei de fazer a simulação no seu site e queria tirar uma dúvida.`);
     if (state.nome) partes.push(`\nMeu nome é ${state.nome}.`);
   } else {
-    partes.push(`Oi ${state.corretorName ? state.corretorName.split(' ')[0] : ''}! Fiz a simulação MCMV no site.`);
+    partes.push(`Oi ${state.corretorName ? state.corretorName.split(' ')[0] : ''}! Fiz a simulação ${isSBPE ? 'de financiamento no site — caí na faixa SBPE' : 'MCMV no site'}.`);
     if (state.nome) partes.push(`\nMeu nome é ${state.nome}.`);
   }
   partes.push(`\n\n*Meu perfil:*`);
@@ -1149,8 +1151,8 @@ function stepResultado(){
     partes.push(`\n*Minha estimativa (SBPE)*:`);
     partes.push(`💰 Financiamento*: R$ ${formatBRL(linha.f)}`);
     partes.push(`📅 Parcela*: R$ ${formatBRL(linha.p)}`);
-    partes.push(`⏱ Prazo: ${prazoLabel}`);
-    partes.push(`📊 Taxa*: a partir de ${linha.t.toString().replace('.',',')}% a.a.`);
+    partes.push(`⏱ Prazo*: ${prazoLabel}`);
+    partes.push(`📊 Taxa*: a partir de ${linha.t.toString().replace('.',',')}% a.a. + TR`);
     partes.push(`🏠 Imóvel de referência*: R$ ${formatBRLCurto(imovelRefSBPE)}`);
     partes.push(`\nSei que nessa faixa o valor real depende do meu rating no banco. Pode rodar minha simulação oficial?`);
   } else {
@@ -1181,9 +1183,12 @@ function stepResultado(){
   }
 
   // Alerta caso o prazo tenha sido reduzido por idade
+  // (no SBPE os valores levam asterisco e a regra é do banco, não da tabela Caixa)
   const alertaPrazo = r.prazoAjustado ? `
     <div class="summary" style="border-left:3px solid var(--gold);background:#fff8e1;">
-      ⚠️ <strong>Prazo reduzido pela idade.</strong> Como você tem ${r.idadeAtual} anos, a Caixa só pode financiar por ${prazoLabel} (em vez dos 35 anos). Isso reduziu o valor que você pode tomar de R$ ${formatBRL(linha.fOriginal)} para R$ ${formatBRL(linha.f)}.
+      ⚠️ <strong>Prazo reduzido pela idade.</strong> Como você tem ${r.idadeAtual} anos, ${isSBPE
+        ? `o banco só financia por ${prazoLabel} (regra dos 80 anos). Isso reduziu a estimativa de R$ ${formatBRL(linha.fOriginal)}* para R$ ${formatBRL(linha.f)}*.`
+        : `a Caixa só pode financiar por ${prazoLabel} (em vez dos 35 anos). Isso reduziu o valor que você pode tomar de R$ ${formatBRL(linha.fOriginal)} para R$ ${formatBRL(linha.f)}.`}
       <br><br>
       <strong>Quer aumentar?</strong> Inclua um 2º proponente mais novo (cônjuge, filho ou parente com renda).
     </div>
@@ -1194,14 +1199,14 @@ function stepResultado(){
     ? '📲 Pedir minha simulação oficial'
     : '📲 Receber minha simulação completa';
   const ctaSubTop = isSBPE
-    ? 'Com sua taxa real de banco · grátis, no WhatsApp'
+    ? 'Com a taxa real do seu banco · grátis, no WhatsApp'
     : 'Grátis e sem compromisso · resposta rápida';
 
   return `
     <div class="result-hero">
-      <div class="label">${isSBPE ? 'Você pode financiar cerca de*' : 'Você pode financiar até'}</div>
+      <div class="label">${isSBPE ? 'Você pode financiar cerca de' : 'Você pode financiar até'}</div>
       <div class="value"><span class="currency">R$</span>${formatBRL(linha.f)}${isSBPE ? '*' : ''}</div>
-      <div class="sub">${perfilLabel} · ${prazoLabel}</div>
+      <div class="sub">${perfilLabel} · ${prazoLabel}${isSBPE ? '*' : ''}</div>
 
       <a href="${linkWhats}" target="_blank" rel="noopener" class="hero-cta">
         ${ctaLabelTop}
@@ -1225,18 +1230,18 @@ function stepResultado(){
       </div>`}
 
       <div class="result-item">
-        <div class="label">📅 Parcela mensal${isSBPE ? '*' : ''}</div>
+        <div class="label">📅 Parcela mensal</div>
         <div class="value">R$ ${formatBRL(linha.p)}${isSBPE ? '*' : ''}</div>
       </div>
 
       <div class="result-item">
-        <div class="label">📊 Taxa de juros${isSBPE ? ' (a partir de)*' : ''}</div>
-        <div class="value">${linha.t.toString().replace('.',',')}%${isSBPE ? '*' : ''} a.a.</div>
+        <div class="label">📊 Taxa de juros${isSBPE ? ' (a partir de)' : ''}</div>
+        <div class="value">${linha.t.toString().replace('.',',')}%${isSBPE ? '* a.a. + TR' : ' a.a.'}</div>
       </div>
 
       ${isSBPE ? `
       <div class="result-item">
-        <div class="label">🏠 Imóvel de referência*</div>
+        <div class="label">🏠 Imóvel de referência</div>
         <div class="value">R$ ${formatBRLCurto(imovelRefSBPE)}*</div>
       </div>` : `
       <div class="result-item">
@@ -1253,7 +1258,7 @@ function stepResultado(){
     </div>
 
     <div class="summary" style="border-left:3px solid var(--gold);background:#fff8e1;">
-      <strong>* Por que tanto asterisco?</strong> No SBPE não existe tabela fixa: taxa, valor aprovado e a própria aprovação dependem do seu <strong>rating bancário</strong> — relacionamento, investimentos, score e como a renda é comprovada. Esses números são só o ponto de partida. A sua simulação oficial, com as suas condições reais, sai em poucas horas pelo WhatsApp.
+      <strong>* Por que tanto asterisco?</strong> No SBPE não existe tabela fixa: taxa, valor aprovado e a própria aprovação dependem do seu <strong>rating bancário</strong> — relacionamento, investimentos, score e como a renda é comprovada. Esses números são só o ponto de partida. A sua simulação oficial, com as suas condições reais, você pede em 1 clique no WhatsApp — sem custo.
     </div>` : `
     <div class="summary">
       <strong>Resumo:</strong> Com sua renda de R$ ${state.renda.toLocaleString('pt-BR')} e ${r.idadeAtual} anos, ${linha.s > 0 ? `você ganha um subsídio de <strong>R$ ${formatBRL(linha.s)}</strong> da Caixa que não precisa devolver. ` : ''}Somando financiamento + subsídio, você compra um imóvel de até <strong>R$ ${formatBRLCurto(totalCompra)}</strong>${entradaMin > 0 ? ` (com entrada de ~R$ ${formatBRLCurto(entradaMin)} pra chegar no teto de R$ ${formatBRLCurto(imovelMax)})` : ''}.
@@ -1275,7 +1280,7 @@ function stepResultado(){
 
     <div class="note">
       ${isSBPE
-        ? `⚠️ * Estimativa de referência SBPE: taxa a partir de ${SBPE_TAXA_REF.toString().replace('.',',')}% a.a. + TR, prazo de 420 meses e parcela de ~30% da renda bruta. Não é oferta de crédito — os valores finais são definidos pelo banco na análise do seu perfil e podem variar bastante pra mais ou pra menos.`
+        ? `⚠️ * Estimativa de referência SBPE: taxa a partir de ${SBPE_TAXA_REF.toString().replace('.',',')}% a.a. + TR, prazo de ${r.prazoUsado} meses${r.prazoAjustado ? ' (limitado pela idade)' : ''} e parcela de ~30% da renda bruta. Não é oferta de crédito — os valores finais são definidos pelo banco na análise do seu perfil e podem variar bastante pra mais ou pra menos.`
         : '⚠️ Valores aproximados baseados na tabela Caixa de 04/2026 (imóvel na planta, prazo padrão de 420 meses). Para idades mais altas o prazo é ajustado proporcionalmente. A análise definitiva é feita pelo banco com sua documentação. O subsídio depende de não ter outro imóvel financiado pelo SFH.'}
     </div>
 
