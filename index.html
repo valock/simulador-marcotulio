@@ -441,6 +441,19 @@ gtag('config','G-ZK0QTMRVWK');
     margin-top:14px;
   }
 
+  /* LETRAS MIÚDAS — asteriscos e avisos ficam longe do resultado, no pé do card */
+  .fine-print{
+    margin-top:22px;
+    padding-top:14px;
+    border-top:1px solid var(--border);
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.55;
+  }
+  .fine-print p{margin-bottom:8px;}
+  .fine-print p:last-child{margin-bottom:0;}
+  .fine-print strong{color:var(--navy);font-weight:600;}
+
   /* CTA EXTRA */
   .restart{
     background:transparent;border:none;color:var(--muted);font-size:13px;
@@ -1255,19 +1268,10 @@ function stepResultado(){
     ${isSBPE ? `
     <div class="summary">
       <strong>Resumo*:</strong> Com renda de R$ ${state.renda.toLocaleString('pt-BR')}, sua simulação sai pelo <strong>SBPE</strong> (acima do teto do MCMV). Na taxa de referência dá pra financiar cerca de <strong>R$ ${formatBRLCurto(linha.f)}*</strong> — um imóvel na faixa de <strong>R$ ${formatBRLCurto(imovelRefSBPE)}*</strong> com entrada de ~20%, <strong>sem teto de valor de imóvel</strong>.
-    </div>
-
-    <div class="summary" style="border-left:3px solid var(--gold);background:#fff8e1;">
-      <strong>* Por que tanto asterisco?</strong> No SBPE não existe tabela fixa: taxa, valor aprovado e a própria aprovação dependem do seu <strong>rating bancário</strong> — relacionamento, investimentos, score e como a renda é comprovada. Esses números são só o ponto de partida. A sua simulação oficial, com as suas condições reais, você pede em 1 clique no WhatsApp — sem custo.
     </div>` : `
     <div class="summary">
       <strong>Resumo:</strong> Com sua renda de R$ ${state.renda.toLocaleString('pt-BR')} e ${r.idadeAtual} anos, ${linha.s > 0 ? `você ganha um subsídio de <strong>R$ ${formatBRL(linha.s)}</strong> da Caixa que não precisa devolver. ` : ''}Somando financiamento + subsídio, você compra um imóvel de até <strong>R$ ${formatBRLCurto(totalCompra)}</strong>${entradaMin > 0 ? ` (com entrada de ~R$ ${formatBRLCurto(entradaMin)} pra chegar no teto de R$ ${formatBRLCurto(imovelMax)})` : ''}.
     </div>`}
-
-    ${state.classeAlta && !isSBPE ? `
-    <div class="summary" style="border-left:3px solid var(--gold);background:#fff8e1;">
-      ℹ️ Nesta faixa de renda a taxa e a aprovação finais dependem da análise de crédito (rating) do banco. Os valores acima são a referência da tabela Caixa.
-    </div>` : ''}
 
     <div style="margin:20px 0 8px;font-size:13px;font-weight:600;color:var(--navy);">
       📄 ${isSBPE ? 'Sua estimativa está pronta — peça a simulação oficial:' : 'Sua simulação está pronta — toque pra enviar:'}
@@ -1278,17 +1282,20 @@ function stepResultado(){
       ${isSBPE ? '📲 Quero minha simulação oficial' : '📲 Enviar minha simulação agora'}
     </a>
 
-    <div class="note">
-      ${isSBPE
-        ? `⚠️ * Estimativa de referência SBPE: taxa a partir de ${SBPE_TAXA_REF.toString().replace('.',',')}% a.a. + TR, prazo de ${r.prazoUsado} meses${r.prazoAjustado ? ' (limitado pela idade)' : ''} e parcela de ~30% da renda bruta. Não é oferta de crédito — os valores finais são definidos pelo banco na análise do seu perfil e podem variar bastante pra mais ou pra menos.`
-        : '⚠️ Valores aproximados baseados na tabela Caixa de 04/2026 (imóvel na planta, prazo padrão de 420 meses). Para idades mais altas o prazo é ajustado proporcionalmente. A análise definitiva é feita pelo banco com sua documentação. O subsídio depende de não ter outro imóvel financiado pelo SFH.'}
-    </div>
-
     <div class="share-block">
       <h3>Curtiu? Manda pra um amigo 💛</h3>
       <p>Quem está pensando em comprar a casa própria vai gostar de descobrir o número dele também.</p>
       <button class="btn btn-share" data-action="share">📲 Indicar para um amigo</button>
       <div class="raffle-teaser"><span class="spark">🎉</span> Em breve: indique e concorra a prêmios</div>
+    </div>
+
+    <div class="fine-print">
+      ${isSBPE ? `
+      <p><strong>* Valores de referência (SBPE).</strong> Acima de R$ 13 mil de renda não existe tabela fixa: taxa, valor aprovado e a própria aprovação dependem do seu rating bancário — relacionamento, investimentos, score e comprovação de renda. Estimativa calculada com taxa a partir de ${SBPE_TAXA_REF.toString().replace('.',',')}% a.a. + TR, prazo de ${r.prazoUsado} meses${r.prazoAjustado ? ' (limitado pela idade)' : ''} e parcela de ~30% da renda bruta.</p>
+      <p>Isto não é oferta de crédito — os valores finais são definidos pelo banco na análise do seu perfil e podem variar pra mais ou pra menos. A simulação oficial, com as suas condições reais, é grátis pelo WhatsApp.</p>` : `
+      <p>Valores aproximados baseados na tabela Caixa de 04/2026 (imóvel na planta, prazo padrão de 420 meses). Para idades mais altas o prazo é ajustado proporcionalmente. A análise definitiva é feita pelo banco com sua documentação. O subsídio depende de não ter outro imóvel financiado pelo SFH.</p>`}
+      ${state.classeAlta && !isSBPE ? `
+      <p>Nesta faixa de renda a taxa e a aprovação finais dependem da análise de crédito (rating) do banco. Os valores acima são a referência da tabela Caixa.</p>` : ''}
     </div>
 
     <button class="restart" data-action="reset">← Refazer simulação</button>
