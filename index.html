@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0F2444" />
-<title>Simulador MCMV — Uberlândia</title>
-<meta name="description" content="Simulação gratuita Minha Casa Minha Vida em Uberlândia/MG. Descubra em 1 minuto seu financiamento, subsídio e parcela." />
+<title>Simulador Minha Casa Minha Vida Uberlândia | Caixa</title>
+<meta name="description" content="Simule grátis seu financiamento Minha Casa Minha Vida em Uberlândia. Veja quanto a Caixa pode financiar, o subsídio estimado, a entrada e a parcela — sem cadastro, em 1 minuto." />
 <link rel="canonical" href="https://simulador.marcotulio.pro/" />
 
 <!-- Open Graph — imagem de preview ao compartilhar (WhatsApp, Facebook, Telegram) -->
@@ -149,6 +149,9 @@ gtag('config','G-ZK0QTMRVWK');
 
   h1.display{font-size:30px;line-height:1.1;color:var(--navy);margin-bottom:8px;}
   h2.display{font-size:22px;line-height:1.15;color:var(--navy);margin-bottom:6px;}
+  /* Título de abertura do card: visual de h1, semântica de h2 (o h1 da
+     página é o do conteúdo editorial, que existe no HTML sem JavaScript). */
+  h2.display.card-title{font-size:30px;line-height:1.1;margin-bottom:8px;}
   .lead{color:var(--muted);font-size:15px;line-height:1.5;margin-bottom:22px;}
 
   label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px;letter-spacing:0.01em;}
@@ -508,7 +511,7 @@ gtag('config','G-ZK0QTMRVWK');
   .restart:hover{color:var(--navy);}
 
   @media (max-width:380px){
-    h1.display{font-size:26px;}
+    h1.display, h2.display.card-title{font-size:26px;}
     .result-hero .value{font-size:32px;}
   }
 
@@ -516,13 +519,194 @@ gtag('config','G-ZK0QTMRVWK');
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
   }
+
+  /* =================================================================
+     CONTEÚDO EDITORIAL — vem no HTML (não depende de JavaScript).
+     É o que buscadores e assistentes de IA leem sem executar script.
+     ================================================================= */
+  #app{padding-bottom:36px;}
+
+  .seo{padding:0 20px 64px;}
+  .seo h1{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:25px;line-height:1.18;color:var(--navy);
+    letter-spacing:-0.02em;margin-bottom:12px;
+  }
+  .seo h2{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:19px;line-height:1.25;color:var(--navy);
+    letter-spacing:-0.01em;margin:30px 0 9px;
+  }
+  .seo h3{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:15.5px;color:var(--navy);margin:20px 0 6px;
+  }
+  .seo p{font-size:15px;line-height:1.65;color:#3f4a5c;margin-bottom:12px;}
+  .seo ul{margin:0 0 14px 18px;}
+  .seo li{font-size:14.5px;line-height:1.6;color:#3f4a5c;margin-bottom:7px;}
+  .seo a{color:var(--navy);text-decoration:underline;text-underline-offset:2px;font-weight:600;}
+  .seo a:hover{color:var(--gold-dark);}
+  .seo strong{color:var(--navy);font-weight:700;}
+
+  /* Resposta direta (formato que buscadores e IAs citam) */
+  .answer{
+    background:#fff;border:1px solid var(--border);
+    border-left:3px solid var(--gold);
+    border-radius:0 12px 12px 0;
+    padding:14px 16px;margin-bottom:14px;
+  }
+  .answer p{margin-bottom:0;font-size:14.5px;}
+
+  .seo-lead{font-size:16px;line-height:1.6;color:var(--muted);margin-bottom:8px;}
+
+  /* Bloco de links pro ecossistema */
+  .linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0 6px;}
+  @media (max-width:420px){ .linkgrid{grid-template-columns:1fr;} }
+  .linkgrid a{
+    display:block;background:#fff;border:1px solid var(--border);
+    border-radius:11px;padding:12px 13px;
+    font-size:13.5px;font-weight:600;color:var(--navy);
+    text-decoration:none;line-height:1.35;
+    transition:border-color .15s, transform .08s;
+  }
+  .linkgrid a:hover{border-color:var(--gold);transform:translateY(-1px);}
+  .linkgrid a span{display:block;font-weight:500;font-size:11.5px;color:var(--muted);margin-top:3px;}
+
+  .seo-cta{
+    display:block;text-align:center;text-decoration:none;
+    background:var(--navy);color:#fff;
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;
+    padding:15px 18px;border-radius:12px;margin:22px 0 6px;
+  }
+  .seo-cta:hover{background:var(--navy-soft);color:#fff;}
+
+  .disclosure{
+    font-size:11.5px;color:var(--muted);line-height:1.55;
+    border-top:1px solid var(--border);margin-top:26px;padding-top:14px;
+  }
+  .disclosure a{color:var(--muted);font-weight:600;}
+
+  /* Rodapé de navegação do ecossistema */
+  .sitefoot{
+    border-top:1px solid var(--border);margin-top:22px;padding-top:16px;
+    display:flex;flex-wrap:wrap;gap:8px 16px;
+  }
+  .sitefoot a{font-size:12.5px;color:var(--navy);text-decoration:none;font-weight:600;}
+  .sitefoot a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
 
 <div class="container" id="app">
-  <!-- conteúdo injetado por JS -->
+  <!-- simulador (injetado por JS) -->
 </div>
+
+<!-- =====================================================================
+     Conteúdo servido no HTML, sem depender de JavaScript.
+     ===================================================================== -->
+<main class="container seo" id="conteudo">
+
+  <h1>Simulador Minha Casa Minha Vida em Uberlândia</h1>
+  <p class="seo-lead">Descubra quanto você pode financiar pela Caixa, se tem direito a subsídio e quanto ficaria a parcela — grátis, sem cadastro e em cerca de 1 minuto.</p>
+
+  <h2>O que este simulador calcula?</h2>
+  <div class="answer">
+    <p>Ele estima quatro números a partir do seu perfil: o <strong>valor que a Caixa pode financiar</strong>, o <strong>subsídio</strong> (o desconto que não volta como dívida), a <strong>parcela mensal</strong> e o <strong>prazo</strong> possível pela sua idade. O cálculo usa a tabela do Minha Casa Minha Vida para imóvel na planta em Uberlândia, com prazo de até 420 meses.</p>
+  </div>
+  <p>As quatro perguntas são idade, renda familiar bruta, tempo de FGTS e composição da família. São essas variáveis que mudam a faixa do programa, a taxa de juros e o tamanho do subsídio. Nada de documento, CPF ou cadastro: o resultado aparece na tela e você decide se quer conversar.</p>
+
+  <h2>Quanto a Caixa pode financiar com a minha renda?</h2>
+  <div class="answer">
+    <p>A conta parte de um limite prático: a parcela costuma ficar em torno de <strong>30% da renda bruta familiar</strong>. A partir daí entram o prazo (até 35 anos) e a taxa de juros do seu perfil. Por isso duas famílias com a mesma renda podem receber valores diferentes — quem tem FGTS antigo paga juros menores e financia mais.</p>
+  </div>
+  <p>Renda familiar é a soma de quem vai assinar o contrato: você, o cônjuge, um dos pais, um irmão. Somar renda quase sempre aumenta o valor financiado, e é por isso que vale simular nas duas configurações. Se quiser o detalhamento por faixa, veja <a href="https://marcotulio.pro/blog/quanto-preciso-ganhar-financiar-uberlandia">quanto é preciso ganhar para financiar em Uberlândia</a>.</p>
+
+  <h2>Como funciona o subsídio do Minha Casa Minha Vida?</h2>
+  <div class="answer">
+    <p>O subsídio é um valor que o governo coloca na compra e que <strong>você não devolve</strong> — ele abate o preço do imóvel em vez de virar parcela. Quanto menor a renda familiar, maior o subsídio. A composição da família também pesa: famílias de duas ou mais pessoas costumam alcançar valores maiores que uma pessoa sozinha.</p>
+  </div>
+  <p>Na prática, o subsídio some conforme a renda sobe e zera nas faixas mais altas do programa. Ele também depende de você não ter outro imóvel financiado pelo SFH. Em Uberlândia ainda existe o <a href="https://marcotulio.pro/blog/cheque-moradia-uberlandia-minha-casa-minha-vida">Cheque Moradia, benefício municipal que pode somar ao programa federal</a>.</p>
+
+  <h2>Posso usar o FGTS?</h2>
+  <div class="answer">
+    <p>Sim, e ele ajuda de duas formas. Quem tem <strong>36 meses ou mais de carteira assinada</strong> (somando todos os empregos da vida) é considerado cotista e paga <strong>juros menores</strong> — o que aumenta o valor financiado. Além disso, o saldo da conta do FGTS pode entrar como entrada, abatendo o valor à vista.</p>
+  </div>
+  <p>Não precisa estar empregado hoje nem ter saldo alto: o que conta para a taxa é o tempo somado de contribuição. O passo a passo do saque está em <a href="https://marcotulio.pro/blog/como-usar-fgts-comprar-imovel-uberlandia">como usar o FGTS para comprar imóvel em Uberlândia</a>.</p>
+
+  <h2>Quanto preciso de entrada?</h2>
+  <div class="answer">
+    <p>Depende da distância entre o valor do imóvel e a soma de <strong>financiamento + subsídio + FGTS</strong>. Quando essa soma cobre o preço, a entrada em dinheiro pode ser pequena ou próxima de zero. Quando o imóvel custa mais que o aprovado, a diferença vira entrada — normalmente parcelada direto com a construtora até a entrega.</p>
+  </div>
+  <p>Por isso o valor do imóvel importa tanto quanto a renda. Veja os cenários em <a href="https://marcotulio.pro/blog/quanto-de-entrada-financiamento-uberlandia">quanto de entrada é preciso para financiar em Uberlândia</a>.</p>
+
+  <h2>Autônomo consegue financiar?</h2>
+  <div class="answer">
+    <p>Consegue. A Caixa não exige carteira assinada — exige <strong>renda comprovável</strong>. Autônomos, MEI, motoristas de aplicativo e profissionais informais comprovam por extrato bancário, declaração de Imposto de Renda, DECORE ou movimentação como MEI. O que muda é a forma de comprovar, não o direito ao programa.</p>
+  </div>
+  <p>Detalhes de documentação em <a href="https://marcotulio.pro/blog/financiar-imovel-autonomo-uberlandia">como financiar imóvel sendo autônomo em Uberlândia</a> e a lista completa em <a href="https://marcotulio.pro/blog/documentos-minha-casa-minha-vida-2026">documentos do Minha Casa Minha Vida</a>.</p>
+
+  <h2>Dá para financiar uma casa, e não só apartamento?</h2>
+  <div class="answer">
+    <p>Dá. O Minha Casa Minha Vida financia <strong>casas e apartamentos</strong> — o que define o enquadramento é o valor do imóvel e o seu perfil de renda, não o formato. Em Uberlândia existem empreendimentos horizontais (casa em lote próprio) e verticais dentro do programa, em regiões diferentes da cidade.</p>
+  </div>
+  <p>A escolha costuma ser entre quintal e área privativa maior, de um lado, e lazer de condomínio e localização mais central, de outro. Um panorama das casas do programa na cidade está em <a href="https://marcotulio.pro/blog/622-casas-minha-casa-minha-vida-uberlandia">casas do Minha Casa Minha Vida em Uberlândia</a>.</p>
+
+  <h2>Sou casado: como a Caixa conta a renda?</h2>
+  <div class="answer">
+    <p>Para um casal, a Caixa considera a <strong>renda bruta somada dos dois</strong> — e é essa soma que deve ser informada na simulação. Casal também forma uma família de duas pessoas, o que costuma alcançar um subsídio maior do que o de uma pessoa sozinha com a mesma renda individual.</p>
+  </div>
+  <p>Na simulação acima existe uma opção para marcar que você é casado no civil ou tem união estável: marcando, o cálculo já considera esse arranjo.</p>
+
+  <h2>Perguntas frequentes</h2>
+
+  <h3>Quanto eu posso financiar pelo Minha Casa Minha Vida?</h3>
+  <p>Depende da sua renda familiar, FGTS, dependentes e idade. A parcela máxima é 30% da renda bruta familiar e o prazo vai até 420 meses (35 anos). Use este simulador para ver o valor exato para o seu perfil em 1 minuto.</p>
+
+  <h3>O simulador é gratuito e sem cadastro?</h3>
+  <p>Sim, totalmente gratuito e sem cadastro. Você responde 4 perguntas e vê na hora o financiamento, subsídio e parcela estimados com base na tabela oficial da Caixa (abril/2026).</p>
+
+  <h3>O resultado do simulador é definitivo?</h3>
+  <p>O simulador usa a planilha oficial da Caixa e dá uma estimativa muito próxima do real. A análise definitiva é feita pela Caixa na aprovação de crédito. Recomendamos enviar o resultado ao corretor Marco Túlio pelo WhatsApp para confirmar os próximos passos.</p>
+
+  <h3>Tenho restrição no nome. Ainda dá para tentar?</h3>
+  <p>A restrição precisa ser resolvida antes da contratação, mas isso não impede começar: dá para simular, entender o valor possível e organizar a regularização com prazo. O caminho está descrito em <a href="https://marcotulio.pro/blog/minha-casa-minha-vida-nome-sujo-score">Minha Casa Minha Vida com nome sujo e score baixo</a>.</p>
+
+  <h3>Vale mais a pena continuar alugando ou financiar?</h3>
+  <p>A comparação honesta considera o valor do aluguel hoje, a parcela estimada, o subsídio e o tempo de permanência no imóvel. Fizemos essa conta em <a href="https://marcotulio.pro/blog/alugar-ou-financiar-uberlandia">alugar ou financiar em Uberlândia</a>.</p>
+
+  <h2>Depois da simulação: onde procurar em Uberlândia</h2>
+  <p>Saber o valor é metade do caminho. A outra metade é descobrir o que existe dentro dele — por região, por tipo de imóvel e por estágio de obra.</p>
+
+  <div class="linkgrid">
+    <a href="https://marcotulio.pro/blog/apartamentos-zona-sul-uberlandia">Apartamentos na Zona Sul<span>Panorama da região</span></a>
+    <a href="https://marcotulio.pro/blog/union-landscape-shopping-park-uberlandia">Shopping Park<span>Imóveis e lançamentos</span></a>
+    <a href="https://marcotulio.pro/blog/union-vereda-tubalina-uberlandia">Tubalina<span>Apartamentos na região</span></a>
+    <a href="https://marcotulio.pro/blog/gran-vic-uberlandia">Gran VIC no Ecopark<span>Apartamentos VIC Engenharia</span></a>
+    <a href="https://marcotulio.pro/blog/moradas-do-horizonte-sabara-uberlandia">Moradas do Horizonte<span>Casas Pacaembu</span></a>
+    <a href="https://marcotulio.pro/blog/622-casas-minha-casa-minha-vida-uberlandia">Casas do MCMV<span>Moradia horizontal</span></a>
+    <a href="https://marcotulio.pro/blog/registro-de-incorporacao-comprar-na-planta">Comprar na planta<span>O que verificar antes</span></a>
+    <a href="https://marcotulio.pro/blog/primeiro-imovel-2026">Primeiro imóvel<span>Guia do começo ao fim</span></a>
+  </div>
+
+  <a class="seo-cta" href="#app">Simular meu financiamento agora</a>
+
+  <div class="disclosure">
+    <p><strong>Aviso.</strong> Os valores apresentados são estimativas e não representam aprovação de crédito. Condições de financiamento, subsídios, taxas e benefícios dependem das regras vigentes e da análise da instituição financeira e dos programas aplicáveis.</p>
+    <p>Conteúdo independente produzido por <a href="https://marcotulio.pro/sobre">Marco Túlio</a>, corretor de imóveis em Uberlândia/MG, atuando pela <a href="https://marcotulio.pro/torrano">Torrano Imóveis</a>. Este site não é o site oficial da Caixa Econômica Federal nem de nenhuma construtora. Base de cálculo: tabela do Minha Casa Minha Vida para imóvel na planta, 420 meses. Fontes: <a href="https://www.caixa.gov.br/voce/habitacao/minha-casa-minha-vida/" rel="nofollow noopener" target="_blank">Caixa Econômica Federal</a> e <a href="https://www.gov.br/cidades/pt-br" rel="nofollow noopener" target="_blank">Ministério das Cidades</a>.</p>
+    <p>Última revisão da base de cálculo: abril de 2026.</p>
+  </div>
+
+  <nav class="sitefoot" aria-label="Navegação do site">
+    <a href="https://marcotulio.pro/">Início</a>
+    <a href="https://marcotulio.pro/blog">Blog</a>
+    <a href="https://marcotulio.pro/blog/primeiro-imovel-2026">Primeiro imóvel</a>
+    <a href="https://marcotulio.pro/blog/como-usar-fgts-comprar-imovel-uberlandia">FGTS</a>
+    <a href="https://marcotulio.pro/blog/cheque-moradia-uberlandia-minha-casa-minha-vida">Cheque Moradia</a>
+    <a href="https://marcotulio.pro/sobre">Sobre Marco Túlio</a>
+    <a href="https://marcotulio.pro/indique">Indique</a>
+  </nav>
+
+</main>
 
 <script>
 /* =====================================================================
@@ -533,8 +717,54 @@ gtag('config','G-ZK0QTMRVWK');
 // Estrutura: cada item = {renda, financ, subsidio, parcela, taxa}
 // O sistema escolhe automaticamente o cenário pelo perfil
 
+/* =====================================================================
+   ANALYTICS
+   Regra de privacidade (LGPD): nunca sai daqui renda exata, nome,
+   telefone, data de nascimento ou documento. Só faixas anônimas.
+   ===================================================================== */
+
+const UTM_KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+
+function capturarUTM(){
+  try{
+    const p = new URLSearchParams(window.location.search);
+    const atual = {};
+    UTM_KEYS.forEach(k => { const v = p.get(k); if (v) atual[k] = v.slice(0,80); });
+    if (Object.keys(atual).length){
+      sessionStorage.setItem('utm_last', JSON.stringify(atual));
+      // primeiro toque só é gravado uma vez por sessão
+      if (!sessionStorage.getItem('utm_first')) sessionStorage.setItem('utm_first', JSON.stringify(atual));
+    }
+  }catch(e){ /* sessionStorage bloqueado: segue sem UTM */ }
+}
+
+function utmParams(){
+  try{
+    const last  = JSON.parse(sessionStorage.getItem('utm_last')  || '{}');
+    const first = JSON.parse(sessionStorage.getItem('utm_first') || '{}');
+    const out = {};
+    UTM_KEYS.forEach(k => { if (last[k]) out[k] = last[k]; });
+    if (first.utm_source) out.utm_source_primeiro = first.utm_source;
+    return out;
+  }catch(e){ return {}; }
+}
+
+/** Faixa anônima — substitui a renda exata nos eventos. */
+function faixaRendaAnon(renda){
+  if (!renda) return 'nao_informado';
+  if (renda < 2000)  return 'ate_2k';
+  if (renda < 3000)  return '2k_3k';
+  if (renda < 4000)  return '3k_4k';
+  if (renda < 5000)  return '4k_5k';
+  if (renda < 6000)  return '5k_6k';
+  if (renda < 8000)  return '6k_8k';
+  if (renda < 10000) return '8k_10k';
+  if (renda < 13000) return '10k_13k';
+  return 'acima_13k';
+}
+
 function trackEvent(name, params){
-  if (typeof gtag === 'function') gtag('event', name, params || {});
+  if (typeof gtag === 'function') gtag('event', name, Object.assign({}, utmParams(), params || {}));
 }
 
 const TABELA = {
@@ -977,6 +1207,7 @@ function calcular(){
    ===================================================================== */
 
 function init(){
+  capturarUTM();
   const params = new URLSearchParams(window.location.search);
   const w = onlyDigits(params.get('w') || '');
   const n = params.get('n') || '';
@@ -1087,7 +1318,7 @@ function renderCliente(){
 function stepNome(){
   return `
     <span class="badge">Minha Casa Minha Vida · Caixa</span>
-    <h1 class="display">Descubra em 1 minuto quanto você pode financiar.</h1>
+    <h2 class="display card-title">Descubra em 1 minuto quanto você pode financiar.</h2>
     <p class="lead">Responda 4 perguntas e veja na hora o valor do financiamento, o subsídio que a Caixa te dá e quanto fica a parcela. De graça e sem cadastro.</p>
 
     <div class="trust-row">
@@ -1501,6 +1732,7 @@ function attachStepListeners(){
       }
       state.anoNasc = ano;
       state.step = 2;
+      trackEvent('simulacao_passo', {passo: 1, campo: 'idade'});
       renderCliente();
     });
   }
@@ -1527,9 +1759,10 @@ function attachStepListeners(){
       if (renda >= 10000){
         state.classeAlta = true;
         state.step = STEPS_TOTAL;
-        trackEvent('simulacao_concluida', {renda_familiar: renda, faixa: faixaDaRenda(renda)});
+        trackEvent('simulacao_concluida', {faixa_renda: faixaRendaAnon(renda), faixa: faixaDaRenda(renda)});
       } else {
         state.step = 3;
+        trackEvent('simulacao_passo', {passo: 2, campo: 'renda', faixa_renda: faixaRendaAnon(renda)});
       }
       renderCliente();
     });
@@ -1553,6 +1786,7 @@ function attachStepListeners(){
     btnCotista.addEventListener('click', () => {
       if (state.cotista === null) return;
       state.step = 4;
+      trackEvent('simulacao_passo', {passo: 3, campo: 'fgts'});
       renderCliente();
     });
   }
@@ -1603,7 +1837,7 @@ function attachStepListeners(){
       if (state.dependente === null && !state.casado) return;
       state.step = STEPS_TOTAL;
       trackEvent('simulacao_concluida', {
-        renda_familiar: state.renda,
+        faixa_renda: faixaRendaAnon(state.renda),
         faixa: faixaDaRenda(state.renda),
         cotista: state.cotista,
         dependente: temDependenteEfetivo(),
@@ -1672,12 +1906,27 @@ init();
 document.getElementById('app').addEventListener('click', function(e){
   const link = e.target.closest('a[href*="wa.me"]');
   if (link){
+    const idadeInviavel = state.anoNasc && calcularPrazoMaxPorIdade(state.anoNasc) <= 0;
     trackEvent('whatsapp_click', {
-      source: state.step >= STEPS_TOTAL ? 'resultado' : 'erro_idade',
-      renda_familiar: state.renda || 0,
+      source: idadeInviavel ? 'erro_idade' : 'resultado',
+      faixa_renda: faixaRendaAnon(state.renda),
     });
   }
 });
+
+// Cliques nos links do conteúdo editorial (medem o valor do SEO na jornada)
+const blocoConteudo = document.getElementById('conteudo');
+if (blocoConteudo){
+  blocoConteudo.addEventListener('click', function(e){
+    const a = e.target.closest('a[href]');
+    if (!a) return;
+    if (a.getAttribute('href') === '#app'){
+      trackEvent('cta_conteudo_simular');
+    } else if (a.href.indexOf('marcotulio.pro') > -1){
+      trackEvent('conteudo_link_click', {destino: a.pathname.slice(0, 100)});
+    }
+  });
+}
 </script>
 </body>
 </html>
