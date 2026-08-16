@@ -217,6 +217,51 @@ gtag('config','G-ZK0QTMRVWK');
   }
   .choice small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:3px;text-transform:none;letter-spacing:0;}
   .choice.active small{color:rgba(255,255,255,.7);}
+  .choice:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  /* CHECKBOX — pergunta complementar (ex.: casado no civil) */
+  .check-row{
+    display:flex;align-items:flex-start;gap:11px;
+    border:1.5px solid var(--border);
+    background:#fafaf7;
+    border-radius:12px;
+    padding:13px 14px;
+    margin-bottom:0;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+    font-size:14px;font-weight:600;color:var(--navy);
+    -webkit-user-select:none;user-select:none;
+  }
+  .check-row:hover{border-color:var(--navy);}
+  .check-row.on{border-color:var(--gold);background:#fffbef;}
+  .check-row input{
+    width:20px;height:20px;flex:none;margin:1px 0 0;
+    accent-color:var(--navy);cursor:pointer;
+  }
+  .check-row small{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:2px;}
+
+  /* Painel que abre quando marca "casado no civil" */
+  .marry-box{
+    margin-top:12px;
+    border:1.5px solid #f0d780;
+    background:linear-gradient(135deg,#fffbef 0%, #fff5d6 100%);
+    border-radius:12px;
+    padding:14px;
+  }
+  .marry-box p{font-size:12.5px;line-height:1.5;color:var(--navy);margin-bottom:11px;}
+  .marry-box label{font-size:12px;margin-bottom:6px;}
+  .marry-box input[type="tel"]{background:#fff;}
+
+  /* Erro de validação abaixo do campo */
+  .field-error{font-size:12.5px;color:var(--danger);font-weight:600;margin-top:7px;}
+  .field-error:empty{display:none;}
+
+  /* Contador de passo */
+  .step-count{
+    font-size:11px;font-weight:600;color:var(--muted);
+    letter-spacing:0.06em;text-transform:uppercase;
+    margin-bottom:8px;
+  }
 
   /* STEP NAV */
   .step-nav{display:flex;gap:10px;margin-top:20px;}
@@ -465,6 +510,11 @@ gtag('config','G-ZK0QTMRVWK');
   @media (max-width:380px){
     h1.display{font-size:26px;}
     .result-hero .value{font-size:32px;}
+  }
+
+  /* Respeita quem pediu menos animação no sistema */
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
   }
 </style>
 </head>
@@ -755,6 +805,7 @@ const state = {
   anoNasc: null,        // ano de nascimento (ex: 1985)
   cotista: null,        // true/false
   dependente: null,     // true/false
+  casado: false,        // casado no civil / união estável → família de 2+
   renda: null,          // número
   classeAlta: false,    // renda >= 10k
   sbpe: false,          // renda > 13k — crédito comum, valores só referência
@@ -780,6 +831,23 @@ function formatBRLCurto(v){
 }
 
 function onlyDigits(s){ return (s||'').replace(/\D/g,''); }
+
+/**
+ * Casal conta como família de 2+ pessoas. Na tabela da Caixa esse arranjo
+ * cai no mesmo cenário de quem tem dependente (subsídio maior).
+ */
+function temDependenteEfetivo(){
+  return state.dependente === true || state.casado === true;
+}
+
+// Faixa usada no Google Analytics
+function faixaDaRenda(renda){
+  if (renda > SBPE_RENDA_MIN) return 'sbpe';
+  if (renda >= 10000) return 'classe_media';
+  if (renda <= 3200) return 'faixa_1';
+  if (renda <= 5000) return 'faixa_2';
+  return 'faixa_3';
+}
 
 function formatPhone(digits){
   digits = onlyDigits(digits);
@@ -872,9 +940,10 @@ function calcular(){
     imovelMax = 600000;
   } else {
     state.sbpe = false;
-    if (state.cotista && state.dependente) chave = 'cotista_com_dep';
-    else if (state.cotista && !state.dependente) chave = 'cotista_sem_dep';
-    else if (!state.cotista && state.dependente) chave = 'nao_cotista_com_dep';
+    const comDep = temDependenteEfetivo();
+    if (state.cotista && comDep) chave = 'cotista_com_dep';
+    else if (state.cotista && !comDep) chave = 'cotista_sem_dep';
+    else if (!state.cotista && comDep) chave = 'nao_cotista_com_dep';
     else chave = 'nao_cotista_sem_dep';
 
     linha = buscarLinhaTabela(TABELA[chave], state.renda);
@@ -983,6 +1052,7 @@ function renderCliente(){
       </div>
     </div>
 
+    ${state.step >= 1 && state.step < STEPS_TOTAL ? `<div class="step-count">Pergunta ${state.step} de 4</div>` : ''}
     ${state.step < STEPS_TOTAL ? `<div class="progress">${progress}</div>` : ''}
 
     <div class="card fade-in" key="step-${state.step}">
@@ -1002,6 +1072,16 @@ function renderCliente(){
   `;
 
   attachStepListeners();
+
+  // No celular a pessoa pode estar no meio da página quando troca de passo
+  window.scrollTo(0, 0);
+
+  // O atributo autofocus não funciona em HTML injetado por innerHTML, então
+  // focamos na mão. Na abertura não focamos: o teclado cobriria a proposta.
+  if (state.step === 1 || state.step === 2){
+    const campo = document.getElementById(state.step === 1 ? 'anoNascCli' : 'rendaCli');
+    if (campo) campo.focus();
+  }
 }
 
 function stepNome(){
@@ -1018,7 +1098,7 @@ function stepNome(){
 
     <div style="margin-bottom:20px;">
       <label for="nomeCli">Como posso te chamar?</label>
-      <input type="text" id="nomeCli" placeholder="Seu primeiro nome" value="${state.nome}" autocomplete="given-name" autofocus />
+      <input type="text" id="nomeCli" placeholder="Seu primeiro nome" value="${state.nome}" autocomplete="given-name" />
     </div>
 
     <button class="btn btn-primary" data-action="next-nome">Começar simulação →</button>
@@ -1035,8 +1115,9 @@ function stepAnoNasc(){
 
     <div style="margin-bottom:20px;">
       <label for="anoNascCli">Ano de nascimento</label>
-      <input type="tel" id="anoNascCli" placeholder="${anoAtual - 35}" value="${state.anoNasc || ''}" inputmode="numeric" maxlength="4" autofocus />
+      <input type="tel" id="anoNascCli" placeholder="${anoAtual - 35}" value="${state.anoNasc || ''}" inputmode="numeric" maxlength="4" />
       <div class="hint">4 dígitos. Ex: 1985</div>
+      <div class="field-error" id="anoNascCliErro"></div>
       <div id="idadePreview" style="margin-top:8px;font-size:13px;color:var(--gold-dark);font-weight:600;"></div>
     </div>
 
@@ -1054,7 +1135,8 @@ function stepRenda(){
 
     <div style="margin-bottom:20px;">
       <label for="rendaCli">Renda familiar mensal (R$)</label>
-      <input type="tel" id="rendaCli" placeholder="3.500" value="${state.renda ? state.renda.toLocaleString('pt-BR') : ''}" inputmode="numeric" autofocus />
+      <input type="tel" id="rendaCli" placeholder="3.500" value="${state.renda ? state.renda.toLocaleString('pt-BR') : ''}" inputmode="numeric" />
+      <div class="field-error" id="rendaCliErro"></div>
     </div>
 
     <div class="step-nav">
@@ -1070,10 +1152,10 @@ function stepCotista(){
     <p class="lead">Conta carteira assinada por <strong>36 meses ou mais</strong> (somando todos os empregos da vida). Quem tem, paga juros mais baixos.</p>
 
     <div class="choices" style="margin-bottom:20px;">
-      <div class="choice ${state.cotista === true ? 'active' : ''}" data-cotista="true">
+      <div class="choice ${state.cotista === true ? 'active' : ''}" data-cotista="true" role="radio" aria-checked="${state.cotista === true}" tabindex="0">
         Sim, tenho<small>+ de 3 anos de carteira</small>
       </div>
-      <div class="choice ${state.cotista === false ? 'active' : ''}" data-cotista="false">
+      <div class="choice ${state.cotista === false ? 'active' : ''}" data-cotista="false" role="radio" aria-checked="${state.cotista === false}" tabindex="0">
         Não tenho<small>Nunca tive ou foi pouco tempo</small>
       </div>
     </div>
@@ -1086,22 +1168,37 @@ function stepCotista(){
 }
 
 function stepDependente(){
+  const casado = state.casado === true;
   return `
     <h2 class="display">Tem filhos<br>ou dependentes?</h2>
     <p class="lead">Filho, enteado ou outro dependente declarado no Imposto de Renda. Com dependente o <strong>subsídio é bem maior</strong>.</p>
 
-    <div class="choices" style="margin-bottom:20px;">
-      <div class="choice ${state.dependente === true ? 'active' : ''}" data-dep="true">
+    <div class="choices" style="margin-bottom:14px;">
+      <div class="choice ${state.dependente === true ? 'active' : ''}" data-dep="true" role="radio" aria-checked="${state.dependente === true}" tabindex="0">
         Sim, tenho<small>Aumenta o subsídio</small>
       </div>
-      <div class="choice ${state.dependente === false ? 'active' : ''}" data-dep="false">
+      <div class="choice ${state.dependente === false ? 'active' : ''}" data-dep="false" role="radio" aria-checked="${state.dependente === false}" tabindex="0">
         Não tenho<small>Subsídio menor</small>
+      </div>
+    </div>
+
+    <label class="check-row ${casado ? 'on' : ''}" id="casadoRow">
+      <input type="checkbox" id="casadoCli" ${casado ? 'checked' : ''} />
+      <span>Sou casado(a) no civil<small>Ou tenho união estável</small></span>
+    </label>
+
+    <div id="casadoBox" ${casado ? '' : 'hidden'}>
+      <div class="marry-box">
+        <p>💍 <strong>A Caixa soma a renda bruta do casal.</strong> Confirme se o valor abaixo já inclui os dois — é ele que define seu financiamento e seu subsídio.</p>
+        <label for="rendaCasalCli">Renda somada do casal (R$)</label>
+        <input type="tel" id="rendaCasalCli" placeholder="3.500" value="${state.renda ? state.renda.toLocaleString('pt-BR') : ''}" inputmode="numeric" />
+        <div class="field-error" id="rendaCasalCliErro"></div>
       </div>
     </div>
 
     <div class="step-nav">
       <button class="btn btn-ghost" data-action="back">← Voltar</button>
-      <button class="btn btn-primary" data-action="ver-resultado" ${state.dependente === null ? 'disabled' : ''}>Ver resultado →</button>
+      <button class="btn btn-primary" data-action="ver-resultado" ${(state.dependente === null && !casado) ? 'disabled' : ''}>Ver resultado →</button>
     </div>
   `;
 }
@@ -1157,6 +1254,7 @@ function stepResultado(){
   partes.push(`• Renda familiar: R$ ${state.renda.toLocaleString('pt-BR')}`);
   if (!state.classeAlta){
     partes.push(`• FGTS +3 anos: ${state.cotista ? 'Sim' : 'Não'}`);
+    if (state.casado) partes.push(`• Casado(a) no civil: Sim (renda somada do casal)`);
     partes.push(`• Dependente: ${state.dependente ? 'Sim' : 'Não'}`);
   }
   if (isSBPE){
@@ -1190,8 +1288,12 @@ function stepResultado(){
   else if (state.classeAlta) perfilLabel = 'Classe Média — sem subsídio MCMV';
   else {
     const cot = state.cotista ? 'Cotista FGTS' : 'Não cotista';
-    const dep = state.dependente ? 'com dependente' : 'sem dependente';
-    perfilLabel = `${cot} · ${dep}`;
+    let comp;
+    if (state.casado && state.dependente) comp = 'casal com dependente';
+    else if (state.casado) comp = 'casal';
+    else if (state.dependente) comp = 'com dependente';
+    else comp = 'sem dependente';
+    perfilLabel = `${cot} · ${comp}`;
   }
 
   // Alerta caso o prazo tenha sido reduzido por idade
@@ -1305,7 +1407,28 @@ function stepResultado(){
    LISTENERS DOS STEPS
    ===================================================================== */
 
+/** Sinaliza erro no campo: treme, mostra a mensagem e devolve o foco. */
+function mostrarErro(input, msg){
+  input.classList.add('shake');
+  setTimeout(()=>input.classList.remove('shake'), 400);
+  const box = document.getElementById(input.id + 'Erro');
+  if (box) box.textContent = msg;
+  input.focus();
+}
+
+function limparErro(input){
+  const box = document.getElementById(input.id + 'Erro');
+  if (box) box.textContent = '';
+}
+
 function attachStepListeners(){
+  // Escolhas também respondem ao teclado (Enter/espaço)
+  document.querySelectorAll('.choice').forEach(el => {
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
+    });
+  });
+
   // Step 0 - nome
   const btnNome = document.querySelector('[data-action="next-nome"]');
   if (btnNome){
@@ -1360,6 +1483,7 @@ function attachStepListeners(){
 
     inputAno.addEventListener('input', e => {
       e.target.value = onlyDigits(e.target.value).slice(0,4);
+      limparErro(inputAno);
       atualizarPreview();
     });
     inputAno.addEventListener('keydown', e => {
@@ -1372,8 +1496,7 @@ function attachStepListeners(){
     btnAno.addEventListener('click', () => {
       const ano = parseInt(onlyDigits(inputAno.value), 10);
       if (!ano || ano < 1925 || ano > anoAtual - 18){
-        inputAno.classList.add('shake');
-        setTimeout(()=>inputAno.classList.remove('shake'), 400);
+        mostrarErro(inputAno, `Digite um ano entre 1925 e ${anoAtual - 18}.`);
         return;
       }
       state.anoNasc = ano;
@@ -1388,6 +1511,7 @@ function attachStepListeners(){
     const inputRenda = document.getElementById('rendaCli');
     inputRenda.addEventListener('input', e => {
       e.target.value = formatRenda(e.target.value);
+      limparErro(inputRenda);
     });
     inputRenda.addEventListener('keydown', e => {
       if (e.key === 'Enter') btnRenda.click();
@@ -1395,16 +1519,15 @@ function attachStepListeners(){
     btnRenda.addEventListener('click', () => {
       const renda = parseInt(onlyDigits(inputRenda.value), 10);
       if (!renda || renda < 1000){
-        inputRenda.classList.add('shake');
-        setTimeout(()=>inputRenda.classList.remove('shake'), 400);
+        mostrarErro(inputRenda, 'Informe uma renda de pelo menos R$ 1.000.');
         return;
       }
       state.renda = renda;
-      // Se renda >= 10k, pula direto pro resultado (classe média)
+      // Se renda >= 10k, pula direto pro resultado (classe média / SBPE)
       if (renda >= 10000){
         state.classeAlta = true;
         state.step = STEPS_TOTAL;
-        trackEvent('simulacao_concluida', {renda_familiar: renda, faixa: renda > SBPE_RENDA_MIN ? 'sbpe' : 'classe_media'});
+        trackEvent('simulacao_concluida', {renda_familiar: renda, faixa: faixaDaRenda(renda)});
       } else {
         state.step = 3;
       }
@@ -1416,8 +1539,12 @@ function attachStepListeners(){
   document.querySelectorAll('[data-cotista]').forEach(el => {
     el.addEventListener('click', () => {
       state.cotista = el.dataset.cotista === 'true';
-      document.querySelectorAll('[data-cotista]').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('[data-cotista]').forEach(x => {
+        x.classList.remove('active');
+        x.setAttribute('aria-checked', 'false');
+      });
       el.classList.add('active');
+      el.setAttribute('aria-checked', 'true');
       document.querySelector('[data-action="next-cotista"]').disabled = false;
     });
   });
@@ -1434,22 +1561,53 @@ function attachStepListeners(){
   document.querySelectorAll('[data-dep]').forEach(el => {
     el.addEventListener('click', () => {
       state.dependente = el.dataset.dep === 'true';
-      document.querySelectorAll('[data-dep]').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('[data-dep]').forEach(x => {
+        x.classList.remove('active');
+        x.setAttribute('aria-checked', 'false');
+      });
       el.classList.add('active');
+      el.setAttribute('aria-checked', 'true');
       document.querySelector('[data-action="ver-resultado"]').disabled = false;
     });
   });
+
+  // Casado no civil: abre o campo da renda somada do casal.
+  const chkCasado = document.getElementById('casadoCli');
+  if (chkCasado){
+    const boxCasado = document.getElementById('casadoBox');
+    const rowCasado = document.getElementById('casadoRow');
+    const inputCasal = document.getElementById('rendaCasalCli');
+    const btnResultado = document.querySelector('[data-action="ver-resultado"]');
+
+    inputCasal.addEventListener('input', e => {
+      e.target.value = formatRenda(e.target.value);
+      limparErro(inputCasal);
+      const v = parseInt(onlyDigits(e.target.value), 10);
+      if (v && v >= 1000) state.renda = v;
+    });
+    inputCasal.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && btnResultado && !btnResultado.disabled) btnResultado.click();
+    });
+
+    chkCasado.addEventListener('change', () => {
+      state.casado = chkCasado.checked;
+      rowCasado.classList.toggle('on', state.casado);
+      boxCasado.hidden = !state.casado;
+      if (btnResultado) btnResultado.disabled = (state.dependente === null && !state.casado);
+      if (state.casado) inputCasal.focus();
+    });
+  }
   const btnVer = document.querySelector('[data-action="ver-resultado"]');
   if (btnVer){
     btnVer.addEventListener('click', () => {
-      if (state.dependente === null) return;
+      if (state.dependente === null && !state.casado) return;
       state.step = STEPS_TOTAL;
-      const faixaLabel = state.renda <= 3200 ? 'faixa_1' : state.renda <= 5000 ? 'faixa_2' : 'faixa_3';
       trackEvent('simulacao_concluida', {
         renda_familiar: state.renda,
-        faixa: faixaLabel,
+        faixa: faixaDaRenda(state.renda),
         cotista: state.cotista,
-        dependente: state.dependente,
+        dependente: temDependenteEfetivo(),
+        casado: state.casado === true,
       });
       renderCliente();
     });
@@ -1474,6 +1632,7 @@ function attachStepListeners(){
       state.anoNasc = null;
       state.cotista = null;
       state.dependente = null;
+      state.casado = false;
       state.renda = null;
       state.classeAlta = false;
       state.sbpe = false;
@@ -1490,6 +1649,7 @@ function attachStepListeners(){
       state.anoNasc = null;
       state.cotista = null;
       state.dependente = null;
+      state.casado = false;
       state.renda = null;
       state.classeAlta = false;
       state.sbpe = false;
