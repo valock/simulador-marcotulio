@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Parâmetros de link de parceiro e de campanha não geram página nova.
+# Evita crawl trap e conteúdo duplicado por querystring.
+Disallow: /*?w=
+Disallow: /*?*utm_
+
+Sitemap: https://simulador.marcotulio.pro/sitemap.xml
