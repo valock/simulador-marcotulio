@@ -28,13 +28,25 @@
 <meta name="twitter:description" content="Quanto você pode financiar, o subsídio da Caixa e a parcela — em 1 minuto." />
 <meta name="twitter:image" content="https://simulador.marcotulio.pro/ogimage.png" />
 
-<!-- Google Analytics 4 (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZK0QTMRVWK"></script>
+<!-- Medição: GA4 + (quando configurado) Google Ads.
+     Só carrega se a pessoa não tiver desativado em /privacidade. -->
 <script>
 window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
-gtag('js',new Date());
-gtag('config','G-ZK0QTMRVWK');
+window.MT_GA_ID  = 'G-ZK0QTMRVWK';
+window.MT_ADS_ID = '';   // ← cole aqui o ID do Google Ads (formato AW-000000000)
+(function(){
+  var recusou = false;
+  try { recusou = localStorage.getItem('mt_analytics_optout') === '1'; } catch(e){}
+  if (recusou){ window.MT_MEDICAO_OFF = true; return; }
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.MT_GA_ID;
+  document.head.appendChild(s);
+  gtag('js', new Date());
+  gtag('config', window.MT_GA_ID);
+  if (window.MT_ADS_ID) gtag('config', window.MT_ADS_ID);
+})();
 </script>
 <!-- Schema.org — WebApplication + FAQPage + BreadcrumbList -->
 <script type="application/ld+json">
@@ -103,7 +115,7 @@ gtag('config','G-ZK0QTMRVWK');
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --navy: #0F2444;
@@ -586,6 +598,33 @@ gtag('config','G-ZK0QTMRVWK');
   }
   .disclosure a{color:var(--muted);font-weight:600;}
 
+  /* Aviso de medição — discreto, não bloqueia o uso do simulador */
+  .privacy-note{
+    position:fixed;left:0;right:0;bottom:0;z-index:70;
+    background:var(--navy);color:#fff;
+    padding:11px 16px calc(11px + env(safe-area-inset-bottom));
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    font-size:12.5px;line-height:1.45;
+    box-shadow:0 -6px 20px -8px rgba(15,36,68,.55);
+  }
+  .privacy-note p{margin:0;max-width:520px;}
+  .privacy-note a{color:var(--gold);font-weight:600;}
+  .privacy-note button{
+    flex:none;background:#fff;color:var(--navy);border:none;
+    padding:9px 15px;border-radius:9px;cursor:pointer;
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:12.5px;
+  }
+  .privacy-note button:hover{background:#f0ece0;}
+  @media (max-width:520px){
+    .privacy-note{flex-direction:column;align-items:stretch;text-align:center;gap:9px;}
+    .privacy-note button{width:100%;}
+  }
+  /* enquanto o aviso está na tela, o botão flutuante sobe para não sobrepor */
+  body.tem-aviso .quick-fab{bottom:calc(74px + env(safe-area-inset-bottom));}
+  @media (max-width:520px){
+    body.tem-aviso .quick-fab{bottom:calc(126px + env(safe-area-inset-bottom));}
+  }
+
   /* Rodapé de navegação do ecossistema */
   .sitefoot{
     border-top:1px solid var(--border);margin-top:22px;padding-top:16px;
@@ -692,7 +731,7 @@ gtag('config','G-ZK0QTMRVWK');
 
   <div class="disclosure">
     <p><strong>Aviso.</strong> Os valores apresentados são estimativas e não representam aprovação de crédito. Condições de financiamento, subsídios, taxas e benefícios dependem das regras vigentes e da análise da instituição financeira e dos programas aplicáveis.</p>
-    <p>Conteúdo independente produzido por <a href="https://marcotulio.pro/sobre">Marco Túlio</a>, corretor de imóveis em Uberlândia/MG, atuando pela <a href="https://marcotulio.pro/torrano">Torrano Imóveis</a>. Este site não é o site oficial da Caixa Econômica Federal nem de nenhuma construtora. Base de cálculo: tabela do Minha Casa Minha Vida para imóvel na planta, 420 meses. Fontes: <a href="https://www.caixa.gov.br/voce/habitacao/minha-casa-minha-vida/" rel="nofollow noopener" target="_blank">Caixa Econômica Federal</a> e <a href="https://www.gov.br/cidades/pt-br" rel="nofollow noopener" target="_blank">Ministério das Cidades</a>.</p>
+    <p>Conteúdo independente produzido por <a href="https://marcotulio.pro/sobre">Marco Túlio Andrade Freitas</a>, corretor de imóveis em Uberlândia/MG, <strong>CRECI/MG nº 7469</strong>, atuando pela <a href="https://marcotulio.pro/torrano">Torrano Imóveis</a>. Este site não é o site oficial da Caixa Econômica Federal nem de nenhuma construtora. Base de cálculo: tabela do Minha Casa Minha Vida para imóvel na planta, 420 meses. Fontes: <a href="https://www.caixa.gov.br/voce/habitacao/minha-casa-minha-vida/" rel="nofollow noopener" target="_blank">Caixa Econômica Federal</a> e <a href="https://www.gov.br/cidades/pt-br" rel="nofollow noopener" target="_blank">Ministério das Cidades</a>.</p>
     <p>Última revisão da base de cálculo: abril de 2026.</p>
   </div>
 
@@ -704,9 +743,16 @@ gtag('config','G-ZK0QTMRVWK');
     <a href="https://marcotulio.pro/blog/cheque-moradia-uberlandia-minha-casa-minha-vida">Cheque Moradia</a>
     <a href="https://marcotulio.pro/sobre">Sobre Marco Túlio</a>
     <a href="https://marcotulio.pro/indique">Indique</a>
+    <a href="/privacidade">Privacidade</a>
   </nav>
 
 </main>
+
+<!-- Aviso de medição: aparece uma vez, some ao confirmar -->
+<div class="privacy-note" id="avisoPrivacidade" hidden>
+  <p>Usamos medição anônima para melhorar o simulador. Nada do que você digita aqui é armazenado. <a href="/privacidade">Como tratamos seus dados</a>.</p>
+  <button type="button" id="btnAvisoOk">Entendi</button>
+</div>
 
 <script>
 /* =====================================================================
@@ -725,6 +771,11 @@ gtag('config','G-ZK0QTMRVWK');
 
 const UTM_KEYS = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
 
+// Rótulos de conversão do Google Ads. Ao criar cada conversão no Ads você
+// recebe algo como 'AW-000000000/AbC-D_efGh'. Cole aqui só o trecho depois
+// da barra. O ID da conta fica em MT_ADS_ID, no <head>.
+const ADS_LABELS = { simulacao: '', whatsapp: '' };
+
 function capturarUTM(){
   try{
     const p = new URLSearchParams(window.location.search);
@@ -735,7 +786,40 @@ function capturarUTM(){
       // primeiro toque só é gravado uma vez por sessão
       if (!sessionStorage.getItem('utm_first')) sessionStorage.setItem('utm_first', JSON.stringify(atual));
     }
-  }catch(e){ /* sessionStorage bloqueado: segue sem UTM */ }
+    // gclid identifica o clique vindo do Google Ads. Guardamos só para saber
+    // a origem do lead — nenhum dado pessoal ou financeiro entra aqui.
+    const gclid = p.get('gclid');
+    if (gclid) sessionStorage.setItem('mt_gclid', gclid.slice(0,120));
+  }catch(e){ /* armazenamento bloqueado: segue sem atribuição */ }
+}
+
+/**
+ * Dispara a conversão no Google Ads (além do evento no GA4).
+ * Silencioso enquanto MT_ADS_ID e os rótulos estiverem vazios.
+ */
+function trackAdsConversion(tipo){
+  if (window.MT_MEDICAO_OFF || !window.MT_ADS_ID) return;
+  const label = ADS_LABELS[tipo];
+  if (!label || typeof gtag !== 'function') return;
+  gtag('event', 'conversion', { send_to: window.MT_ADS_ID + '/' + label });
+}
+
+/** Origem da visita, para o corretor saber de onde veio o lead. */
+function refOrigem(){
+  try{
+    if (sessionStorage.getItem('mt_gclid')) return 'ads';
+    const last = JSON.parse(sessionStorage.getItem('utm_last') || '{}');
+    if (last.utm_source) return String(last.utm_source).replace(/[^\w-]/g,'').slice(0,18);
+  }catch(e){}
+  return '';
+}
+
+/** Código curto e anônimo da simulação, só para referência na conversa. */
+function codigoSimulacao(){
+  if (!state.codigo){
+    state.codigo = 'MT' + Math.random().toString(36).slice(2,6).toUpperCase();
+  }
+  return state.codigo;
 }
 
 function utmParams(){
@@ -1036,6 +1120,7 @@ const state = {
   cotista: null,        // true/false
   dependente: null,     // true/false
   casado: false,        // casado no civil / união estável → família de 2+
+  codigo: null,         // código curto e anônimo da simulação (atribuição)
   renda: null,          // número
   classeAlta: false,    // renda >= 10k
   sbpe: false,          // renda > 13k — crédito comum, valores só referência
@@ -1511,6 +1596,11 @@ function stepResultado(){
     }
   }
 
+  // Linha de referência: código anônimo + origem da visita. Serve pro corretor
+  // saber qual campanha gerou a conversa. Sem renda, nome ou documento.
+  const origemRef = refOrigem();
+  partes.push(`\n_ref: ${codigoSimulacao()}${origemRef ? '/' + origemRef : ''}_`);
+
   const msgWhats = partes.join('\n').replace(/\n+/g,'\n');
   const linkWhats = `https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(msgWhats)}`;
 
@@ -1760,6 +1850,7 @@ function attachStepListeners(){
         state.classeAlta = true;
         state.step = STEPS_TOTAL;
         trackEvent('simulacao_concluida', {faixa_renda: faixaRendaAnon(renda), faixa: faixaDaRenda(renda)});
+        trackAdsConversion('simulacao');
       } else {
         state.step = 3;
         trackEvent('simulacao_passo', {passo: 2, campo: 'renda', faixa_renda: faixaRendaAnon(renda)});
@@ -1843,6 +1934,7 @@ function attachStepListeners(){
         dependente: temDependenteEfetivo(),
         casado: state.casado === true,
       });
+      trackAdsConversion('simulacao');
       renderCliente();
     });
   }
@@ -1899,6 +1991,24 @@ function attachStepListeners(){
   });
 }
 
+// Aviso de medição — mostrado uma vez por navegador
+(function(){
+  const CHAVE = 'mt_aviso_visto';
+  const el = document.getElementById('avisoPrivacidade');
+  const btn = document.getElementById('btnAvisoOk');
+  if (!el || !btn) return;
+  let visto = false;
+  try { visto = localStorage.getItem(CHAVE) === '1'; } catch(e){ visto = true; }
+  if (visto) return;
+  el.hidden = false;
+  document.body.classList.add('tem-aviso');
+  btn.addEventListener('click', () => {
+    try { localStorage.setItem(CHAVE, '1'); } catch(e){}
+    el.hidden = true;
+    document.body.classList.remove('tem-aviso');
+  });
+})();
+
 // Inicializa
 init();
 
@@ -1911,6 +2021,7 @@ document.getElementById('app').addEventListener('click', function(e){
       source: idadeInviavel ? 'erro_idade' : 'resultado',
       faixa_renda: faixaRendaAnon(state.renda),
     });
+    trackAdsConversion('whatsapp');
   }
 });
 
