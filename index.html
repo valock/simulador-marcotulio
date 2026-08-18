@@ -33,8 +33,13 @@
 <script>
 window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
-window.MT_GA_ID  = 'G-ZK0QTMRVWK';
-window.MT_ADS_ID = '';   // ← cole aqui o ID do Google Ads (formato AW-000000000)
+// Duas propriedades: a do simulador (histórico) e a do site principal,
+// que é a vinculada ao Google Ads. Como os dois domínios compartilham
+// marcotulio.pro, a segunda enxerga a jornada site -> simulador como uma
+// sessão só, sem precisar de configuração de domínio cruzado.
+window.MT_GA_ID   = 'G-ZK0QTMRVWK';   // propriedade do simulador
+window.MT_GA_MAIN = 'G-HHXMC3T24V';   // propriedade marcotulio.pro (ligada ao Ads)
+window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar tag nativa
 (function(){
   var recusou = false;
   try { recusou = localStorage.getItem('mt_analytics_optout') === '1'; } catch(e){}
@@ -45,7 +50,8 @@ window.MT_ADS_ID = '';   // ← cole aqui o ID do Google Ads (formato AW-0000000
   document.head.appendChild(s);
   gtag('js', new Date());
   gtag('config', window.MT_GA_ID);
-  if (window.MT_ADS_ID) gtag('config', window.MT_ADS_ID);
+  if (window.MT_GA_MAIN) gtag('config', window.MT_GA_MAIN);
+  if (window.MT_ADS_ID)  gtag('config', window.MT_ADS_ID);
 })();
 </script>
 <!-- Schema.org — WebApplication + FAQPage + BreadcrumbList -->
