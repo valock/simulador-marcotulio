@@ -111,6 +111,36 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Simulador Minha Casa Minha Vida em Uberlândia",
+  "description": "Como funciona o financiamento Minha Casa Minha Vida em Uberlândia: quanto a Caixa financia, subsídio, FGTS, entrada e exemplos por faixa de renda.",
+  "mainEntityOfPage": {"@type": "WebPage", "@id": "https://simulador.marcotulio.pro/"},
+  "author": {
+    "@type": "Person",
+    "@id": "https://marcotulio.pro/sobre#marcotulio",
+    "name": "Marco Túlio Andrade Freitas",
+    "jobTitle": "Corretor de Imóveis",
+    "url": "https://marcotulio.pro/sobre",
+    "sameAs": ["https://marcotulio.pro/", "https://imoveis.marcotulio.pro/"]
+  },
+  "publisher": {
+    "@type": "Person",
+    "@id": "https://marcotulio.pro/sobre#marcotulio",
+    "name": "Marco Túlio Andrade Freitas"
+  },
+  "datePublished": "2026-08-16",
+  "dateModified": "2026-08-30",
+  "inLanguage": "pt-BR",
+  "isAccessibleForFree": true,
+  "citation": [
+    "https://www.caixa.gov.br/voce/habitacao/minha-casa-minha-vida/",
+    "https://www.gov.br/cidades/pt-br"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
     {"@type": "ListItem", "position": 1, "name": "marcotulio.pro", "item": "https://marcotulio.pro/"},
@@ -577,6 +607,32 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
 
   .seo-lead{font-size:16px;line-height:1.6;color:var(--muted);margin-bottom:8px;}
 
+  /* Autoria e data — sinal de confiança exigido em conteúdo financeiro */
+  .byline{
+    display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;
+    font-size:12.5px;color:var(--muted);
+    border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+    padding:11px 0;margin:14px 0 22px;
+  }
+  .byline strong{color:var(--navy);font-weight:700;}
+  .byline .sep{opacity:.4;}
+
+  /* Tabela de exemplos */
+  .tabela-wrap{overflow-x:auto;margin:14px 0 10px;}
+  .tabela{border-collapse:collapse;width:100%;min-width:420px;font-size:13.5px;}
+  .tabela th{
+    background:var(--navy);color:#fff;font-weight:600;
+    text-align:left;padding:10px 11px;font-size:12.5px;
+    letter-spacing:.02em;
+  }
+  .tabela th:first-child{border-radius:9px 0 0 0;}
+  .tabela th:last-child{border-radius:0 9px 0 0;}
+  .tabela td{padding:10px 11px;border-bottom:1px solid var(--border);color:#3f4a5c;}
+  .tabela tr:nth-child(even) td{background:#fafaf7;}
+  .tabela td:first-child{font-weight:700;color:var(--navy);}
+  .tabela .destaque{color:var(--gold-dark);font-weight:700;}
+  .tabela-nota{font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+
   /* Bloco de links pro ecossistema */
   .linkgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0 6px;}
   @media (max-width:420px){ .linkgrid{grid-template-columns:1fr;} }
@@ -654,6 +710,14 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
   <h1>Simulador Minha Casa Minha Vida em Uberlândia</h1>
   <p class="seo-lead">Descubra quanto você pode financiar pela Caixa, se tem direito a subsídio e quanto ficaria a parcela — grátis, sem cadastro e em cerca de 1 minuto.</p>
 
+  <div class="byline">
+    <span>Por <strong>Marco Túlio Andrade Freitas</strong>, corretor de imóveis em Uberlândia/MG</span>
+    <span class="sep">·</span>
+    <span>CRECI/MG nº 7469</span>
+    <span class="sep">·</span>
+    <span>Base de cálculo revisada em <strong>abril de 2026</strong></span>
+  </div>
+
   <h2>O que este simulador calcula?</h2>
   <div class="answer">
     <p>Ele estima quatro números a partir do seu perfil: o <strong>valor que a Caixa pode financiar</strong>, o <strong>subsídio</strong> (o desconto que não volta como dívida), a <strong>parcela mensal</strong> e o <strong>prazo</strong> possível pela sua idade. O cálculo usa a tabela do Minha Casa Minha Vida para imóvel na planta em Uberlândia, com prazo de até 420 meses.</p>
@@ -666,6 +730,31 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
   </div>
   <p>Renda familiar é a soma de quem vai assinar o contrato: você, o cônjuge, um dos pais, um irmão. Somar renda quase sempre aumenta o valor financiado, e é por isso que vale simular nas duas configurações. Se quiser o detalhamento por faixa, veja <a href="https://marcotulio.pro/blog/quanto-preciso-ganhar-financiar-uberlandia">quanto é preciso ganhar para financiar em Uberlândia</a>.</p>
 
+  <h3>Exemplos por faixa de renda</h3>
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Renda familiar</th>
+          <th>Financiamento</th>
+          <th>Subsídio</th>
+          <th>Parcela</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>R$ 2.000</td><td>R$ 124.077</td><td class="destaque">R$ 42.274</td><td>R$ 600</td></tr>
+        <tr><td>R$ 3.000</td><td>R$ 171.426</td><td class="destaque">R$ 8.004</td><td>R$ 900</td></tr>
+        <tr><td>R$ 4.000</td><td>R$ 208.000</td><td>R$ 1.762</td><td>R$ 1.183</td></tr>
+        <tr><td>R$ 5.000</td><td>R$ 208.000</td><td>—</td><td>R$ 1.323</td></tr>
+        <tr><td>R$ 6.000</td><td>R$ 250.767</td><td>—</td><td>R$ 1.800</td></tr>
+        <tr><td>R$ 8.000</td><td>R$ 320.000</td><td>—</td><td>R$ 2.282</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="tabela-nota">Estimativas para quem tem FGTS com mais de 3 anos, um dependente e 35 anos de idade, com prazo de 420 meses. Seu número muda conforme idade, FGTS e composição da família — por isso a simulação é individual.</p>
+
+  <p>Repare no que a tabela mostra: entre R$ 2.000 e R$ 3.000 de renda o financiamento sobe cerca de R$ 47 mil, mas o <strong>subsídio cai de R$ 42 mil para R$ 8 mil</strong>. Ganhar um pouco mais nem sempre significa comprar melhor — às vezes significa trocar dinheiro que não volta por dívida. É exatamente isso que a simulação revela antes de você escolher o imóvel.</p>
+
   <h2>Como funciona o subsídio do Minha Casa Minha Vida?</h2>
   <div class="answer">
     <p>O subsídio é um valor que o governo coloca na compra e que <strong>você não devolve</strong> — ele abate o preço do imóvel em vez de virar parcela. Quanto menor a renda familiar, maior o subsídio. A composição da família também pesa: famílias de duas ou mais pessoas costumam alcançar valores maiores que uma pessoa sozinha.</p>
@@ -676,6 +765,7 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
   <div class="answer">
     <p>Sim, e ele ajuda de duas formas. Quem tem <strong>36 meses ou mais de carteira assinada</strong> (somando todos os empregos da vida) é considerado cotista e paga <strong>juros menores</strong> — o que aumenta o valor financiado. Além disso, o saldo da conta do FGTS pode entrar como entrada, abatendo o valor à vista.</p>
   </div>
+  <p>A diferença é concreta: com renda de R$ 3.000 e um dependente, quem é cotista financia cerca de <strong>R$ 171.426</strong> a 4,85% ao ano; quem não é, cerca de <strong>R$ 161.142</strong> a 5,37%. São <strong>R$ 10.283 a mais</strong> pelo mesmo salário, só pelo tempo de carteira assinada.</p>
   <p>Não precisa estar empregado hoje nem ter saldo alto: o que conta para a taxa é o tempo somado de contribuição. O passo a passo do saque está em <a href="https://marcotulio.pro/blog/como-usar-fgts-comprar-imovel-uberlandia">como usar o FGTS para comprar imóvel em Uberlândia</a>.</p>
 
   <h2>Quanto preciso de entrada?</h2>
@@ -722,7 +812,10 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
   <h2>Depois da simulação: onde procurar em Uberlândia</h2>
   <p>Saber o valor é metade do caminho. A outra metade é descobrir o que existe dentro dele — por região, por tipo de imóvel e por estágio de obra.</p>
 
+  <p>Os imóveis disponíveis com preço, metragem e fotos estão em <a href="https://imoveis.marcotulio.pro/">imoveis.marcotulio.pro</a>, o portal com as opções que acompanho em Uberlândia. Vale abrir com o valor da sua simulação em mãos.</p>
+
   <div class="linkgrid">
+    <a href="https://imoveis.marcotulio.pro/">Ver imóveis disponíveis<span>Casas e apartamentos com preço</span></a>
     <a href="https://marcotulio.pro/blog/apartamentos-zona-sul-uberlandia">Apartamentos na Zona Sul<span>Panorama da região</span></a>
     <a href="https://marcotulio.pro/blog/union-landscape-shopping-park-uberlandia">Shopping Park<span>Imóveis e lançamentos</span></a>
     <a href="https://marcotulio.pro/blog/union-vereda-tubalina-uberlandia">Tubalina<span>Apartamentos na região</span></a>
