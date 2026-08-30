@@ -232,6 +232,7 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
     transition:transform .08s, box-shadow .15s, background .15s;
     display:flex;align-items:center;justify-content:center;gap:8px;
     letter-spacing:-0.01em;
+    text-decoration:none;text-align:center;
   }
   .btn-primary{background:var(--navy);color:#fff;}
   .btn-primary:hover{background:var(--navy-soft);}
@@ -349,7 +350,7 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
     background:#25D366;color:#fff;
     padding:14px 18px;border-radius:12px;
     font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;
-    text-decoration:none;
+    text-decoration:none;text-align:center;
     transition:background .15s, transform .08s;
     box-shadow:0 6px 16px -6px rgba(37,211,102,.6);
   }
@@ -380,6 +381,56 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
   .quick-fab:hover{opacity:1;box-shadow:0 14px 32px -10px rgba(15,36,68,.7);}
   .quick-fab:active{transform:translateY(1px);}
   .quick-fab .bolt{color:var(--gold);font-size:14px;line-height:1;}
+
+  /* CTA FIXO DO RODAPÉ — 90% dos acessos vêm do celular, então o clique final
+     precisa estar sempre ao alcance do polegar. Aparece na tela de resultado
+     assim que o botão do topo sai da vista. */
+  .cta-fixo{
+    position:fixed;left:0;right:0;bottom:0;z-index:65;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(247,244,236,.86);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border-top:1px solid var(--border);
+    box-shadow:0 -8px 24px -12px rgba(15,36,68,.35);
+    transform:translateY(115%);
+    transition:transform .22s cubic-bezier(.22,1,.36,1);
+  }
+  .cta-fixo.on{transform:translateY(0);}
+  .cta-fixo-btn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;
+    max-width:532px;margin:0 auto;
+    min-height:58px;padding:10px 16px;
+    background:#25D366;color:#fff;text-decoration:none;
+    border-radius:14px;
+    box-shadow:0 8px 20px -8px rgba(37,211,102,.75);
+    transition:background .15s, transform .08s;
+  }
+  .cta-fixo-btn:active{transform:translateY(1px);background:#1ebe5d;}
+  .cta-fixo-btn:hover{background:#1ebe5d;}
+  .cta-fixo-t{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;
+    letter-spacing:-0.01em;line-height:1.1;
+  }
+  .cta-fixo-s{font-size:11.5px;line-height:1.2;color:rgba(255,255,255,.88);}
+  /* Com o aviso de medição na tela, o CTA sobe para não ficar por baixo.
+     A altura real do aviso é medida no JS (--aviso-h). */
+  body.tem-aviso .cta-fixo{
+    bottom:var(--aviso-h, 110px);
+    padding-bottom:10px;
+  }
+  /* Espaço no fim da página pra barra nunca cobrir a letra miúda.
+     As alturas reais (--cta-h, --aviso-h) são medidas no JS; os valores
+     de reserva cobrem o intervalo até a medição acontecer. */
+  body.tem-cta{padding-bottom:calc(var(--cta-h, 92px) + 14px + env(safe-area-inset-bottom));}
+  body.tem-cta.tem-aviso{padding-bottom:calc(var(--cta-h, 92px) + var(--aviso-h, 120px) + 14px);}
+  @media (prefers-reduced-motion:reduce){ .cta-fixo{transition:none;} }
+
+  .cta-trust{
+    margin:10px 2px 0;text-align:center;
+    font-size:11.5px;line-height:1.5;color:var(--muted);
+  }
+  .cta-trust strong{color:var(--navy);}
 
   /* INDICAR PARA UM AMIGO */
   .btn-share{
@@ -669,6 +720,10 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
     font-size:12.5px;line-height:1.45;
     box-shadow:0 -6px 20px -8px rgba(15,36,68,.55);
   }
+  /* display:flex (estilo de autor) vence o [hidden]{display:none} do navegador,
+     então o aviso precisa desligar o display explicitamente — sem isto ele
+     ficava fixo no rodapé pra sempre, inclusive depois do "Entendi". */
+  .privacy-note[hidden]{display:none;}
   .privacy-note p{margin:0;max-width:520px;}
   .privacy-note a{color:var(--gold);font-weight:600;}
   .privacy-note button{
@@ -1211,10 +1266,8 @@ const state = {
   corretorPhone: null,  // só dígitos
   corretorName: null,
   modoSuporte: false,   // true quando o WhatsApp final cai no Marco (padrão)
-  quick: false,         // true quando entra pela "simulação rápida" (pula o nome)
   // dados da calculadora
   step: 0,
-  nome: '',
   anoNasc: null,        // ano de nascimento (ex: 1985)
   cotista: null,        // true/false
   dependente: null,     // true/false
@@ -1225,9 +1278,10 @@ const state = {
   sbpe: false,          // renda > 13k — crédito comum, valores só referência
 };
 
-// Steps visíveis na barra de progresso (não conta o resultado):
-// 0=nome, 1=ano, 2=renda, 3=cotista, 4=dep, 5=resultado
-const STEPS_TOTAL = 5;
+// Steps visíveis na barra de progresso (não conta o resultado).
+// A renda vem primeiro: é a pergunta que a pessoa veio responder.
+// 0=renda, 1=ano, 2=cotista, 3=dependente, 4=resultado
+const STEPS_TOTAL = 4;
 
 /* =====================================================================
    UTILS
@@ -1432,21 +1486,23 @@ function shareToFriend(){
    SIMULAÇÃO — CALCULADORA
    ===================================================================== */
 
+// Dados do CTA fixo do rodapé. stepResultado() preenche; renderCliente() lê
+// logo depois — a ordem das chamadas garante que o valor está fresco.
+let ctaFixo = null;
+
 function renderCliente(){
+  ctaFixo = null;
   const progress = Array.from({length: STEPS_TOTAL}, (_, i) => {
-    // No modo rápido o passo do nome é pulado, então já entra como concluído.
-    const skippedNome = state.quick && i === 0;
-    if (i < state.step || skippedNome) return '<div class="progress-step done"></div>';
+    if (i < state.step) return '<div class="progress-step done"></div>';
     if (i === state.step) return '<div class="progress-step current"></div>';
     return '<div class="progress-step"></div>';
   }).join('');
 
   let content;
-  if (state.step === 0) content = stepNome();
+  if (state.step === 0) content = stepRenda();
   else if (state.step === 1) content = stepAnoNasc();
-  else if (state.step === 2) content = stepRenda();
-  else if (state.step === 3) content = stepCotista();
-  else if (state.step === 4) content = stepDependente();
+  else if (state.step === 2) content = stepCotista();
+  else if (state.step === 3) content = stepDependente();
   else content = stepResultado();
 
   // Marca: por padrão é o Marco Túlio (dono da ferramenta). Se o visitante
@@ -1455,8 +1511,10 @@ function renderCliente(){
   const brandMark = (brandName.trim()[0] || 'M').toUpperCase();
   const brandSub = state.modoSuporte ? 'Simulador MCMV · Uberlândia' : 'Simulação MCMV · Caixa';
 
-  // Botão flutuante de simulação rápida (some na tela de resultado).
-  const showFab = state.step < STEPS_TOTAL;
+  // Botão flutuante de recomeço: só faz sentido depois que a pessoa já respondeu
+  // algo. Na primeira tela ele não teria o que reiniciar e ainda cobria o link
+  // de indicação; na tela de resultado o lugar é da barra fixa de WhatsApp.
+  const showFab = state.step > 0 && state.step < STEPS_TOTAL;
 
   document.getElementById('app').innerHTML = `
     <div class="brand fade-in">
@@ -1467,7 +1525,7 @@ function renderCliente(){
       </div>
     </div>
 
-    ${state.step >= 1 && state.step < STEPS_TOTAL ? `<div class="step-count">Pergunta ${state.step} de 4</div>` : ''}
+    ${state.step < STEPS_TOTAL ? `<div class="step-count">Pergunta ${state.step + 1} de ${STEPS_TOTAL}</div>` : ''}
     ${state.step < STEPS_TOTAL ? `<div class="progress">${progress}</div>` : ''}
 
     <div class="card fade-in" key="step-${state.step}">
@@ -1481,51 +1539,80 @@ function renderCliente(){
     </div>
 
     ${showFab ? `
-    <button class="quick-fab" data-action="quick-sim" title="Começar uma simulação sem digitar nome">
-      <span class="bolt">⚡</span> Simulação rápida
+    <button class="quick-fab" data-action="quick-sim" title="Recomeçar a simulação do zero">
+      <span class="bolt">⚡</span> Nova simulação
     </button>` : ''}
+
+    ${ctaFixo ? `
+    <div class="cta-fixo" id="ctaFixo">
+      <a href="${ctaFixo.link}" target="_blank" rel="noopener" data-cta="fixo"
+         class="cta-fixo-btn" aria-label="${ctaFixo.aria}">
+        <span class="cta-fixo-t">${ctaFixo.titulo}</span>
+        <span class="cta-fixo-s">${ctaFixo.sub}</span>
+      </a>
+    </div>` : ''}
   `;
 
   attachStepListeners();
+  ativarCtaFixo();
 
   // No celular a pessoa pode estar no meio da página quando troca de passo
   window.scrollTo(0, 0);
 
   // O atributo autofocus não funciona em HTML injetado por innerHTML, então
   // focamos na mão. Na abertura não focamos: o teclado cobriria a proposta.
-  if (state.step === 1 || state.step === 2){
-    const campo = document.getElementById(state.step === 1 ? 'anoNascCli' : 'rendaCli');
+  // Na primeira tela não focamos: o teclado cobriria a proposta de valor.
+  if (state.step === 1){
+    const campo = document.getElementById('anoNascCli');
     if (campo) campo.focus();
   }
 }
 
-function stepNome(){
-  return `
-    <span class="badge">Minha Casa Minha Vida · Caixa</span>
-    <h2 class="display card-title">Descubra em 1 minuto quanto você pode financiar.</h2>
-    <p class="lead">Responda 4 perguntas e veja na hora o valor do financiamento, o subsídio que a Caixa te dá e quanto fica a parcela. De graça e sem cadastro.</p>
+// Controla a barra fixa de WhatsApp: ela só entra quando o botão do topo sai
+// da tela, pra não repetir dois botões verdes na mesma dobra.
+let obsCtaFixo = null;
+let medirCta = null;
 
-    <div class="trust-row">
-      <span class="trust-pill"><span class="ico">⏱</span> Leva 1 minuto</span>
-      <span class="trust-pill"><span class="ico">🎁</span> Mostra seu subsídio</span>
-      <span class="trust-pill"><span class="ico">🔒</span> Sem cadastro</span>
-    </div>
+function ativarCtaFixo(){
+  if (obsCtaFixo){ obsCtaFixo.disconnect(); obsCtaFixo = null; }
 
-    <div style="margin-bottom:20px;">
-      <label for="nomeCli">Como posso te chamar?</label>
-      <input type="text" id="nomeCli" placeholder="Seu primeiro nome" value="${state.nome}" autocomplete="given-name" />
-    </div>
+  const barra = document.getElementById('ctaFixo');
+  if (medirCta){ window.removeEventListener('resize', medirCta); medirCta = null; }
 
-    <button class="btn btn-primary" data-action="next-nome">Começar simulação →</button>
+  if (!barra){
+    document.body.classList.remove('tem-cta');
+    document.body.style.removeProperty('--cta-h');
+    return;
+  }
+  document.body.classList.add('tem-cta');
 
-    <button class="share-inline" data-action="share">Conhece alguém querendo a casa própria? Indique →</button>
-  `;
+  // A altura da barra muda com a fonte e a largura da tela; medimos de verdade
+  // pra reservar exatamente esse espaço no fim da página.
+  medirCta = () => document.body.style.setProperty('--cta-h', barra.offsetHeight + 'px');
+  medirCta();
+  window.addEventListener('resize', medirCta);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(medirCta).catch(()=>{});
+
+  // Âncora = o botão de WhatsApp do topo do resultado.
+  const ancora = document.querySelector('.hero-cta') ||
+                 document.querySelector('#app a.btn-whats');
+
+  // Navegador antigo sem IntersectionObserver: mostra sempre, é o caso seguro.
+  if (!ancora || typeof IntersectionObserver === 'undefined'){
+    barra.classList.add('on');
+    return;
+  }
+
+  obsCtaFixo = new IntersectionObserver((entradas) => {
+    barra.classList.toggle('on', !entradas[0].isIntersecting);
+  }, {threshold: 0});
+  obsCtaFixo.observe(ancora);
 }
 
 function stepAnoNasc(){
   const anoAtual = new Date().getFullYear();
   return `
-    <h2 class="display">${state.nome ? `Prazer, ${state.nome}!` : 'Beleza.'}<br>Em que ano você nasceu?</h2>
+    <h2 class="display">Em que ano você nasceu?</h2>
     <p class="lead">A Caixa financia até os <strong>80 anos e 2 meses</strong> de idade. Pela sua idade eu calculo o prazo certo do contrato.</p>
 
     <div style="margin-bottom:20px;">
@@ -1545,19 +1632,25 @@ function stepAnoNasc(){
 
 function stepRenda(){
   return `
-    <h2 class="display">${state.nome ? `Beleza, ${state.nome}.` : 'Beleza.'}<br>Qual a renda da sua família?</h2>
-    <p class="lead">Some sua renda + de quem vai entrar no financiamento (cônjuge, pai, mãe, irmão). É o valor bruto, antes dos descontos.</p>
+    <span class="badge">Minha Casa Minha Vida · Caixa</span>
+    <h2 class="display card-title">Qual a renda da sua família?</h2>
+    <p class="lead">É a primeira das 4 perguntas. Some sua renda + a de quem vai entrar no financiamento (cônjuge, pai, mãe, irmão). Use o valor bruto, antes dos descontos.</p>
 
-    <div style="margin-bottom:20px;">
+    <div style="margin-bottom:18px;">
       <label for="rendaCli">Renda familiar mensal (R$)</label>
       <input type="tel" id="rendaCli" placeholder="3.500" value="${state.renda ? state.renda.toLocaleString('pt-BR') : ''}" inputmode="numeric" />
       <div class="field-error" id="rendaCliErro"></div>
     </div>
 
-    <div class="step-nav">
-      <button class="btn btn-ghost" data-action="back">← Voltar</button>
-      <button class="btn btn-primary" data-action="next-renda">Próximo →</button>
+    <button class="btn btn-primary" data-action="next-renda">Ver quanto posso financiar →</button>
+
+    <div class="trust-row" style="margin:16px 0 0;">
+      <span class="trust-pill"><span class="ico">⏱</span> Leva 1 minuto</span>
+      <span class="trust-pill"><span class="ico">🎁</span> Mostra seu subsídio</span>
+      <span class="trust-pill"><span class="ico">🔒</span> Sem cadastro</span>
     </div>
+
+    <button class="share-inline" data-action="share">Conhece alguém querendo a casa própria? Indique →</button>
   `;
 }
 
@@ -1631,6 +1724,13 @@ function stepResultado(){
 
   // Caso especial: idade não permite financiar
   if (r.prazoUsado <= 0){
+    const linkIdade = `https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(`Oi! Tentei simular mas minha idade não bate na regra da Caixa (${r.idadeAtual} anos). Como faço com 2º proponente?`)}`;
+    ctaFixo = {
+      link: linkIdade,
+      titulo: 'Ver a saída do 2º proponente',
+      sub: 'Falar com Marco Túlio no WhatsApp',
+      aria: 'Falar com Marco Túlio no WhatsApp sobre o 2º proponente',
+    };
     return `
       <div class="result-hero" style="background:linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);">
         <div class="label" style="color:#fff;">Não foi possível simular</div>
@@ -1642,7 +1742,7 @@ function stepResultado(){
         <br><br>
         <strong>Saída comum:</strong> trazer um <strong>2º proponente</strong> mais novo (cônjuge, filho maior, irmão) com renda comprovada. Aí a Caixa usa a idade do mais novo pra calcular o prazo.
       </div>
-      <a href="https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(`Oi! Tentei simular mas minha idade não bate na regra da Caixa (${r.idadeAtual} anos). Como faço com 2º proponente?`)}" target="_blank" rel="noopener" class="btn btn-whats">
+      <a href="${linkIdade}" target="_blank" rel="noopener" class="btn btn-whats" data-cta="principal">
         📲 Ver a solução do 2º proponente
       </a>
       <button class="restart" data-action="reset">← Refazer com outros dados</button>
@@ -1659,10 +1759,8 @@ function stepResultado(){
   const partes = [];
   if (state.modoSuporte){
     partes.push(`Oi Marco! Acabei de fazer a simulação no seu site e queria tirar uma dúvida.`);
-    if (state.nome) partes.push(`\nMeu nome é ${state.nome}.`);
   } else {
     partes.push(`Oi ${state.corretorName ? state.corretorName.split(' ')[0] : ''}! Fiz a simulação ${isSBPE ? 'de financiamento no site — caí na faixa SBPE' : 'MCMV no site'}.`);
-    if (state.nome) partes.push(`\nMeu nome é ${state.nome}.`);
   }
   partes.push(`\n\n*Meu perfil:*`);
   partes.push(`• Idade: ${r.idadeAtual} anos`);
@@ -1703,6 +1801,14 @@ function stepResultado(){
   const msgWhats = partes.join('\n').replace(/\n+/g,'\n');
   const linkWhats = `https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(msgWhats)}`;
 
+  // Barra fixa de WhatsApp — o clique final no celular
+  ctaFixo = {
+    link: linkWhats,
+    titulo: isSBPE ? 'Pedir simulação oficial' : 'Enviar minha simulação',
+    sub: `${isSBPE ? 'Cerca de ' : ''}R$ ${formatBRLCurto(linha.f)} · direto no WhatsApp`,
+    aria: 'Enviar minha simulação para Marco Túlio no WhatsApp',
+  };
+
   let perfilLabel = '';
   if (isSBPE) perfilLabel = 'SBPE — fora do MCMV*';
   else if (state.classeAlta) perfilLabel = 'Classe Média — sem subsídio MCMV';
@@ -1742,7 +1848,7 @@ function stepResultado(){
       <div class="value"><span class="currency">R$</span>${formatBRL(linha.f)}${isSBPE ? '*' : ''}</div>
       <div class="sub">${perfilLabel} · ${prazoLabel}${isSBPE ? '*' : ''}</div>
 
-      <a href="${linkWhats}" target="_blank" rel="noopener" class="hero-cta">
+      <a href="${linkWhats}" target="_blank" rel="noopener" class="hero-cta" data-cta="hero">
         ${ctaLabelTop}
       </a>
       <span class="hero-cta-sub">${ctaSubTop}</span>
@@ -1799,9 +1905,11 @@ function stepResultado(){
     </div>
     <div class="whats-preview">${msgWhats}</div>
 
-    <a href="${linkWhats}" target="_blank" rel="noopener" class="btn btn-whats" id="abrirWhats">
+    <a href="${linkWhats}" target="_blank" rel="noopener" class="btn btn-whats" id="abrirWhats" data-cta="principal">
       ${isSBPE ? '📲 Quero minha simulação oficial' : '📲 Enviar minha simulação agora'}
     </a>
+    <p class="cta-trust">Abre o WhatsApp com a mensagem pronta — você só confere e envia.<br>
+      <strong>Marco Túlio Andrade Freitas</strong> · CRECI/MG 7469 · Uberlândia</p>
 
     <div class="share-block">
       <h3>Curtiu? Manda pra um amigo 💛</h3>
@@ -1848,21 +1956,6 @@ function attachStepListeners(){
       if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
     });
   });
-
-  // Step 0 - nome
-  const btnNome = document.querySelector('[data-action="next-nome"]');
-  if (btnNome){
-    const inputNome = document.getElementById('nomeCli');
-    inputNome.addEventListener('keydown', e => {
-      if (e.key === 'Enter') btnNome.click();
-    });
-    btnNome.addEventListener('click', () => {
-      state.nome = inputNome.value.trim();
-      state.step = 1;
-      trackEvent('simulacao_iniciada');
-      renderCliente();
-    });
-  }
 
   // Step 1 - ano de nascimento
   const btnAno = document.querySelector('[data-action="next-ano"]');
@@ -1920,13 +2013,23 @@ function attachStepListeners(){
         return;
       }
       state.anoNasc = ano;
-      state.step = 2;
-      trackEvent('simulacao_passo', {passo: 1, campo: 'idade'});
+      trackEvent('simulacao_passo', {passo: 2, campo: 'idade'});
+      // Acima de R$10 mil não há faixa do MCMV: FGTS e dependente não mudam nada.
+      if (state.classeAlta){
+        state.step = STEPS_TOTAL;
+        trackEvent('simulacao_concluida', {
+          faixa_renda: faixaRendaAnon(state.renda),
+          faixa: faixaDaRenda(state.renda),
+        });
+        trackAdsConversion('simulacao');
+      } else {
+        state.step = 2;
+      }
       renderCliente();
     });
   }
 
-  // Step 2 - renda
+  // Step 0 - renda (primeira pergunta)
   const btnRenda = document.querySelector('[data-action="next-renda"]');
   if (btnRenda){
     const inputRenda = document.getElementById('rendaCli');
@@ -1944,16 +2047,11 @@ function attachStepListeners(){
         return;
       }
       state.renda = renda;
-      // Se renda >= 10k, pula direto pro resultado (classe média / SBPE)
-      if (renda >= 10000){
-        state.classeAlta = true;
-        state.step = STEPS_TOTAL;
-        trackEvent('simulacao_concluida', {faixa_renda: faixaRendaAnon(renda), faixa: faixaDaRenda(renda)});
-        trackAdsConversion('simulacao');
-      } else {
-        state.step = 3;
-        trackEvent('simulacao_passo', {passo: 2, campo: 'renda', faixa_renda: faixaRendaAnon(renda)});
-      }
+      state.classeAlta = renda >= 10000;
+      // Responder a renda é o que marca o início real da simulação.
+      trackEvent('simulacao_iniciada', {faixa_renda: faixaRendaAnon(renda)});
+      trackEvent('simulacao_passo', {passo: 1, campo: 'renda', faixa_renda: faixaRendaAnon(renda)});
+      state.step = 1;   // a idade é obrigatória: define o prazo do contrato
       renderCliente();
     });
   }
@@ -1975,7 +2073,7 @@ function attachStepListeners(){
   if (btnCotista){
     btnCotista.addEventListener('click', () => {
       if (state.cotista === null) return;
-      state.step = 4;
+      state.step = 3;
       trackEvent('simulacao_passo', {passo: 3, campo: 'fgts'});
       renderCliente();
     });
@@ -2053,7 +2151,6 @@ function attachStepListeners(){
   if (btnReset){
     btnReset.addEventListener('click', () => {
       state.step = 0;
-      state.nome = '';
       state.anoNasc = null;
       state.cotista = null;
       state.dependente = null;
@@ -2061,16 +2158,14 @@ function attachStepListeners(){
       state.renda = null;
       state.classeAlta = false;
       state.sbpe = false;
-      state.quick = false;
       renderCliente();
     });
   }
 
-  // Botão flutuante — simulação rápida (zera tudo e pula o nome)
+  // Botão flutuante — recomeça do zero, na primeira pergunta
   const btnQuick = document.querySelector('[data-action="quick-sim"]');
   if (btnQuick){
     btnQuick.addEventListener('click', () => {
-      state.nome = '';
       state.anoNasc = null;
       state.cotista = null;
       state.dependente = null;
@@ -2078,8 +2173,7 @@ function attachStepListeners(){
       state.renda = null;
       state.classeAlta = false;
       state.sbpe = false;
-      state.quick = true;
-      state.step = 1;   // pula direto pro ano de nascimento
+      state.step = 0;
       renderCliente();
     });
   }
@@ -2101,10 +2195,19 @@ function attachStepListeners(){
   if (visto) return;
   el.hidden = false;
   document.body.classList.add('tem-aviso');
+
+  // O aviso muda de altura entre celular e desktop; a barra fixa de WhatsApp
+  // se apoia nessa medida pra nunca ficar por baixo dele.
+  const medir = () => document.body.style.setProperty('--aviso-h', el.offsetHeight + 'px');
+  medir();
+  window.addEventListener('resize', medir);
+
   btn.addEventListener('click', () => {
     try { localStorage.setItem(CHAVE, '1'); } catch(e){}
     el.hidden = true;
     document.body.classList.remove('tem-aviso');
+    document.body.style.removeProperty('--aviso-h');
+    window.removeEventListener('resize', medir);
   });
 })();
 
@@ -2118,6 +2221,8 @@ document.getElementById('app').addEventListener('click', function(e){
     const idadeInviavel = state.anoNasc && calcularPrazoMaxPorIdade(state.anoNasc) <= 0;
     trackEvent('whatsapp_click', {
       source: idadeInviavel ? 'erro_idade' : 'resultado',
+      // qual dos botões converteu: topo do hero, botão do meio ou barra fixa
+      botao: link.getAttribute('data-cta') || 'outro',
       faixa_renda: faixaRendaAnon(state.renda),
     });
     trackAdsConversion('whatsapp');
