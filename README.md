@@ -6,10 +6,11 @@ Simulador de financiamento imobiliário (Caixa / Minha Casa Minha Vida) para Ube
 
 ## Como funciona
 
-- **Entrou, simulou.** Não há mais etapa de cadastro de corretor — a ferramenta é do Marco e o WhatsApp final é sempre o dele.
-- **Simulação rápida.** Botão flutuante no canto inferior direito (⚡) inicia uma simulação pulando o nome — atalho para uso pessoal/atendimento na hora.
+- **Entrou, simulou.** A primeira tela já pergunta a renda. São 4 perguntas até o resultado, sem cadastro.
+- **O resultado leva à aprovação.** A tela mostra o valor da tabela Caixa e explica que o valor aprovado de verdade sai na análise de crédito. O botão abre o WhatsApp do Marco com uma mensagem pronta, do cliente pedindo a lista de documentos para abrir a análise.
+- **O WhatsApp é sempre o do Marco.** O antigo link de parceiro (`?w=telefone&n=nome`) foi desativado: ele deixava qualquer pessoa apontar o botão para outro número. Links antigos continuam abrindo a página, mas o contato vem para o Marco.
+- **Nova simulação.** Botão flutuante (⚡) no canto inferior direito para recomeçar do zero.
 - **Indicar para um amigo.** Botão de compartilhamento (Web Share API, com fallback para WhatsApp) na abertura e no resultado. Base para uma futura **campanha de sorteio** (já há um teaser "indique e concorra a prêmios").
-- **Compatibilidade.** Links antigos de parceiro (`?w=telefone&n=nome`) continuam funcionando e direcionam o contato para aquele número.
 
 ## Preview no WhatsApp / redes (Open Graph)
 O `index.html` aponta para `https://simulador.marcotulio.pro/ogimage.png`. Para a foto aparecer ao compartilhar o link, o arquivo **`ogimage.png`** (1200×630) precisa estar na **raiz** do repositório, junto do `index.html`, para ser incluído no deploy automático do Netlify (evitando que uploads manuais sejam sobrescritos).

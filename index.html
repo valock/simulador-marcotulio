@@ -426,6 +426,34 @@ window.MT_ADS_ID  = '';   // ← ID do Google Ads (AW-000000000), se um dia usar
   body.tem-cta.tem-aviso{padding-bottom:calc(var(--cta-h, 92px) + var(--aviso-h, 120px) + 14px);}
   @media (prefers-reduced-motion:reduce){ .cta-fixo{transition:none;} }
 
+  /* PONTE PARA A APROVAÇÃO — entre o resumo e a mensagem. O número do topo é
+     da tabela; o que a Caixa aprova só sai na análise. Essa lacuna é o que
+     faz a pessoa querer dar o próximo passo. */
+  .aprovacao{
+    margin:18px 0 4px;
+    padding:16px 16px 14px;
+    border:1.5px solid var(--navy);
+    border-radius:14px;
+    background:#f5f8fc;
+  }
+  .aprovacao h3{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:18px;line-height:1.2;letter-spacing:-0.01em;
+    color:var(--navy);margin-bottom:6px;
+  }
+  .aprovacao p{font-size:13.5px;line-height:1.5;color:var(--ink);margin-bottom:11px;}
+  .aprovacao ul{list-style:none;display:grid;gap:8px;}
+  .aprovacao li{
+    position:relative;padding-left:25px;
+    font-size:13.5px;line-height:1.4;font-weight:600;color:var(--ink);
+  }
+  .aprovacao li::before{
+    content:'✓';position:absolute;left:0;top:1px;
+    width:17px;height:17px;border-radius:50%;
+    background:var(--success);color:#fff;
+    font-size:10.5px;font-weight:800;line-height:17px;text-align:center;
+  }
+
   .cta-trust{
     margin:10px 2px 0;text-align:center;
     font-size:11.5px;line-height:1.5;color:var(--muted);
@@ -1241,8 +1269,11 @@ const TABELA = {
 // Domínio final de produção (link compartilhável aponta sempre pra cá)
 const PROD_BASE_URL = 'https://simulador.marcotulio.pro/';
 
-// WhatsApp do "dono do site" — usado quando o cliente pula direto sem corretor
-const SUPORTE_PHONE = '5534996778075';   // Marco Túlio Andrade
+// WhatsApp do Marco Túlio — destino de todo contato do simulador. A página é
+// só dele: o antigo link de parceiro (?w=telefone&n=nome) foi desativado, porque
+// deixava qualquer pessoa apontar o botão para outro número e captar o lead
+// com o CRECI do Marco no rodapé.
+const SUPORTE_PHONE = '5534996778075';
 const SUPORTE_NAME  = 'Marco Túlio';
 
 // SBPE — acima de R$ 13 mil de renda sai do MCMV e cai no crédito comum.
@@ -1262,10 +1293,6 @@ const PRAZO_MIN_VIAVEL_MESES = 60;                 // 5 anos: abaixo disso, aler
    ===================================================================== */
 
 const state = {
-  mode: null,           // 'corretor' | 'cliente'
-  corretorPhone: null,  // só dígitos
-  corretorName: null,
-  modoSuporte: false,   // true quando o WhatsApp final cai no Marco (padrão)
   // dados da calculadora
   step: 0,
   anoNasc: null,        // ano de nascimento (ex: 1985)
@@ -1289,14 +1316,6 @@ const STEPS_TOTAL = 4;
 
 function formatBRL(v){
   return v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-
-// O nome do parceiro chega pela URL (?n=) e é injetado via innerHTML. Sem
-// filtro, um link forjado executa script na página — e quem executa script
-// aqui pode trocar o número de WhatsApp de destino e desviar o lead.
-// Só passa o que é nome de gente: letras, espaço, hífen e apóstrofo.
-function nomeSeguro(s){
-  return (s || '').replace(/[^\p{L}\s'’-]/gu, '').trim().slice(0, 40);
 }
 
 // Escape de HTML para tudo que vai pra innerHTML sem ser markup nosso.
@@ -1475,24 +1494,8 @@ function calcular(){
 
 function init(){
   capturarUTM();
-  const params = new URLSearchParams(window.location.search);
-  const w = onlyDigits(params.get('w') || '');
-  const n = nomeSeguro(params.get('n'));
-
-  // A ferramenta é do Marco Túlio: quem abrir já cai direto na simulação
-  // e o WhatsApp final sempre vai pra ele. Links antigos de parceiro
-  // (?w=outro número) continuam funcionando e direcionam pra esse número.
-  if (w && w.length >= 10 && w !== SUPORTE_PHONE){
-    state.corretorPhone = w;
-    state.corretorName = n || SUPORTE_NAME;
-    state.modoSuporte = false;
-  } else {
-    state.corretorPhone = SUPORTE_PHONE;
-    state.corretorName = SUPORTE_NAME;
-    state.modoSuporte = true;
-  }
-
-  state.mode = 'cliente';
+  // Links antigos com ?w= e ?n= continuam abrindo a página normalmente;
+  // os parâmetros só são ignorados, e o contato vem para o Marco.
   state.step = 0;
   renderCliente();
 }
@@ -1534,11 +1537,6 @@ function renderCliente(){
   else if (state.step === 3) content = stepDependente();
   else content = stepResultado();
 
-  // Marca: por padrão é o Marco Túlio (dono da ferramenta). Se o visitante
-  // chegou por um link antigo de parceiro, mostra o nome do parceiro.
-  const brandName = state.modoSuporte ? 'Marco Túlio' : (state.corretorName || 'Corretor parceiro');
-  const brandMark = (brandName.trim()[0] || 'M').toUpperCase();
-  const brandSub = state.modoSuporte ? 'Simulador MCMV · Uberlândia' : 'Simulação MCMV · Caixa';
 
   // Botão flutuante de recomeço: só faz sentido depois que a pessoa já respondeu
   // algo. Na primeira tela ele não teria o que reiniciar e ainda cobria o link
@@ -1547,10 +1545,10 @@ function renderCliente(){
 
   document.getElementById('app').innerHTML = `
     <div class="brand fade-in">
-      <div class="brand-mark">${escaparHTML(brandMark)}</div>
+      <div class="brand-mark">M</div>
       <div>
-        <div class="brand-name">${escaparHTML(brandName)}</div>
-        <div class="brand-sub">${brandSub}</div>
+        <div class="brand-name">${SUPORTE_NAME}</div>
+        <div class="brand-sub">Simulador MCMV · Uberlândia</div>
       </div>
     </div>
 
@@ -1754,7 +1752,7 @@ function stepResultado(){
 
   // Caso especial: idade não permite financiar
   if (r.prazoUsado <= 0){
-    const linkIdade = `https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(`Oi! Tentei simular mas minha idade não bate na regra da Caixa (${r.idadeAtual} anos). Como faço com 2º proponente?`)}`;
+    const linkIdade = `https://wa.me/${SUPORTE_PHONE}?text=${encodeURIComponent(`Oi! Tentei simular mas minha idade não bate na regra da Caixa (${r.idadeAtual} anos). Como faço com 2º proponente?`)}`;
     ctaFixo = {
       link: linkIdade,
       titulo: 'Ver a saída do 2º proponente',
@@ -1789,10 +1787,6 @@ function stepResultado(){
   // Quem escreve é o cliente, já decidido, pedindo a documentação pra abrir a
   // proposta na Caixa — não é alguém tirando dúvida. Curta de propósito: fica
   // aqui só o que o Marco precisa pra protocolar sem perguntar nada de volta.
-  const saudacao = state.modoSuporte
-    ? 'Marco'
-    : (state.corretorName ? state.corretorName.split(' ')[0] : 'Olá');
-
   const taxaTxt = linha.t.toString().replace('.', ',');
 
   const perfil = [`${r.idadeAtual} anos`, `renda familiar R$ ${state.renda.toLocaleString('pt-BR')}`];
@@ -1811,8 +1805,8 @@ function stepResultado(){
   const blocos = [];
 
   blocos.push(isSBPE
-    ? `${saudacao}, fiz a simulação no seu site e caí na faixa SBPE. Quero seguir com a proposta na Caixa.`
-    : `${saudacao}, fiz a simulação no seu site e quero seguir com a proposta na Caixa.`);
+    ? 'Marco, fiz a simulação no seu site e caí na faixa SBPE. Quero seguir com a proposta na Caixa.'
+    : 'Marco, fiz a simulação no seu site e quero seguir com a proposta na Caixa.');
 
   const dados = [`*Perfil:* ${perfil.join(' · ')}`];
   if (isSBPE){
@@ -1842,7 +1836,7 @@ function stepResultado(){
   // replace(/\n+/g,'\n'), que colapsava justamente essas linhas e entregava
   // a mensagem como um parágrafo único.
   const msgWhats = blocos.join('\n\n');
-  const linkWhats = `https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(msgWhats)}`;
+  const linkWhats = `https://wa.me/${SUPORTE_PHONE}?text=${encodeURIComponent(msgWhats)}`;
 
   // Barra fixa de WhatsApp — o clique final no celular
   ctaFixo = {
@@ -1876,6 +1870,25 @@ function stepResultado(){
       <strong>Quer aumentar?</strong> Inclua um 2º proponente mais novo (cônjuge, filho ou parente com renda).
     </div>
   ` : '';
+
+  // Ponte entre "simulei" e "vou aprovar". Nada aqui promete valor: só diz o
+  // que é verdade e a simulação não alcança — o número aprovado sai na análise,
+  // e o FGTS (que o simulador não pergunta) pode entrar na entrada.
+  const fgtsLinha = state.classeAlta
+    ? 'Com 3 anos ou mais de carteira, o FGTS pode ajudar na entrada'
+    : (state.cotista ? 'Seu saldo do FGTS pode ajudar na entrada — a simulação não conta com ele' : '');
+  const blocoAprovacao = `
+    <div class="aprovacao">
+      <h3>Quanto a Caixa aprova pra você?</h3>
+      <p>${isSBPE
+        ? 'A estimativa acima usa uma taxa de referência. A taxa e o valor reais saem na análise de crédito e dependem do seu relacionamento com o banco.'
+        : 'O valor acima é da tabela. O seu, de verdade, sai na análise de crédito — e é com ele em mãos que você escolhe o imóvel.'}</p>
+      <ul>
+        <li>Análise gratuita, sem compromisso de compra</li>
+        ${fgtsLinha ? `<li>${fgtsLinha}</li>` : ''}
+        <li>Começa com os documentos, pelo WhatsApp</li>
+      </ul>
+    </div>`;
 
   // CTAs falam da SIMULAÇÃO (o que a pessoa ganha), não de "falar com alguém"
   const ctaLabelTop = '📲 Quero seguir com a proposta';
@@ -1940,6 +1953,8 @@ function stepResultado(){
     <div class="summary">
       <strong>Resumo:</strong> Com sua renda de R$ ${state.renda.toLocaleString('pt-BR')} e ${r.idadeAtual} anos, ${linha.s > 0 ? `você ganha um subsídio de <strong>R$ ${formatBRL(linha.s)}</strong> da Caixa que não precisa devolver. ` : ''}Somando financiamento + subsídio, você compra um imóvel de até <strong>R$ ${formatBRLCurto(totalCompra)}</strong>${entradaMin > 0 ? ` (com entrada de ~R$ ${formatBRLCurto(entradaMin)} pra chegar no teto de R$ ${formatBRLCurto(imovelMax)})` : ''}.
     </div>`}
+
+    ${blocoAprovacao}
 
     <div style="margin:20px 0 8px;font-size:13px;font-weight:600;color:var(--navy);">
       📄 Sua mensagem está pronta — confira e envie:
@@ -2021,9 +2036,11 @@ function attachStepListeners(){
       btnAno.disabled = false;
 
       if (prazoMax <= 0){
-        previewEl.textContent = `⚠️ Com ${idade} anos, pela regra da Caixa não dá pra financiar.`;
+        // Sozinho não financia, mas existe saída (2º proponente mais novo).
+        // O botão segue ativo e leva direto pra tela que explica isso — antes
+        // ele travava aqui e a pessoa saía sem nenhum caminho.
+        previewEl.textContent = `⚠️ Com ${idade} anos, a Caixa não financia sozinho — mas existe uma saída.`;
         previewEl.style.color = 'var(--danger)';
-        btnAno.disabled = true;
         return;
       }
       if (prazoMax >= PRAZO_PADRAO_MESES){
@@ -2055,6 +2072,13 @@ function attachStepListeners(){
       }
       state.anoNasc = ano;
       trackEvent('simulacao_passo', {passo: 2, campo: 'idade'});
+      // Idade acima da regra: FGTS e dependente não mudam nada. Vai direto pra
+      // tela do 2º proponente. Não conta como simulação concluída.
+      if (calcularPrazoMaxPorIdade(ano) <= 0){
+        state.step = STEPS_TOTAL;
+        renderCliente();
+        return;
+      }
       // Acima de R$10 mil não há faixa do MCMV: FGTS e dependente não mudam nada.
       if (state.classeAlta){
         state.step = STEPS_TOTAL;
