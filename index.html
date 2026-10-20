@@ -1291,6 +1291,35 @@ function formatBRL(v){
   return v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
+// O nome do parceiro chega pela URL (?n=) e é injetado via innerHTML. Sem
+// filtro, um link forjado executa script na página — e quem executa script
+// aqui pode trocar o número de WhatsApp de destino e desviar o lead.
+// Só passa o que é nome de gente: letras, espaço, hífen e apóstrofo.
+function nomeSeguro(s){
+  return (s || '').replace(/[^\p{L}\s'’-]/gu, '').trim().slice(0, 40);
+}
+
+// Escape de HTML para tudo que vai pra innerHTML sem ser markup nosso.
+function escaparHTML(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  })[c]);
+}
+
+// Preview da mensagem: mostra como o WhatsApp vai renderizar (*negrito*,
+// _itálico_), depois de escapar. O texto enviado continua sendo o original.
+function previewWhats(s){
+  return escaparHTML(s)
+    .replace(/\*([^*\n]+)\*/g, '<strong>$1</strong>')
+    .replace(/_([^_\n]+)_/g, '<em>$1</em>');
+}
+
+// Reais inteiros, sem centavos. Na mensagem do WhatsApp o centavo é precisão
+// falsa: nenhum deles sobrevive à análise de crédito, e ocupa espaço de leitura.
+function formatBRLRedondo(v){
+  return Math.round(v).toLocaleString('pt-BR', {maximumFractionDigits:0});
+}
+
 function formatBRLCurto(v){
   // corte em 999.950: abaixo disso o ramo "mil" arredondaria pra "1.000 mil"
   if (v >= 999950) return (v/1000000).toLocaleString('pt-BR',{maximumFractionDigits:2}) + ' mi';
@@ -1448,7 +1477,7 @@ function init(){
   capturarUTM();
   const params = new URLSearchParams(window.location.search);
   const w = onlyDigits(params.get('w') || '');
-  const n = params.get('n') || '';
+  const n = nomeSeguro(params.get('n'));
 
   // A ferramenta é do Marco Túlio: quem abrir já cai direto na simulação
   // e o WhatsApp final sempre vai pra ele. Links antigos de parceiro
@@ -1518,9 +1547,9 @@ function renderCliente(){
 
   document.getElementById('app').innerHTML = `
     <div class="brand fade-in">
-      <div class="brand-mark">${brandMark}</div>
+      <div class="brand-mark">${escaparHTML(brandMark)}</div>
       <div>
-        <div class="brand-name">${brandName}</div>
+        <div class="brand-name">${escaparHTML(brandName)}</div>
         <div class="brand-sub">${brandSub}</div>
       </div>
     </div>
@@ -1588,7 +1617,8 @@ function ativarCtaFixo(){
 
   // A altura da barra muda com a fonte e a largura da tela; medimos de verdade
   // pra reservar exatamente esse espaço no fim da página.
-  medirCta = () => document.body.style.setProperty('--cta-h', barra.offsetHeight + 'px');
+  medirCta = () => document.body.style.setProperty(
+    '--cta-h', Math.ceil(barra.getBoundingClientRect().height) + 'px');
   medirCta();
   window.addEventListener('resize', medirCta);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(medirCta).catch(()=>{});
@@ -1755,58 +1785,71 @@ function stepResultado(){
     ? '35 anos (420x)'
     : `${anosPrazo}${mesesExtras ? ' anos e ' + mesesExtras + ' meses' : ' anos'} (${r.prazoUsado}x)`;
 
-  // monta mensagem do WhatsApp — varia conforme modo (corretor parceiro ou suporte direto)
-  const partes = [];
-  if (state.modoSuporte){
-    partes.push(`Oi Marco! Acabei de fazer a simulação no seu site e queria tirar uma dúvida.`);
-  } else {
-    partes.push(`Oi ${state.corretorName ? state.corretorName.split(' ')[0] : ''}! Fiz a simulação ${isSBPE ? 'de financiamento no site — caí na faixa SBPE' : 'MCMV no site'}.`);
-  }
-  partes.push(`\n\n*Meu perfil:*`);
-  partes.push(`• Idade: ${r.idadeAtual} anos`);
-  partes.push(`• Renda familiar: R$ ${state.renda.toLocaleString('pt-BR')}`);
+  // MENSAGEM DO WHATSAPP
+  // Quem escreve é o cliente, já decidido, pedindo a documentação pra abrir a
+  // proposta na Caixa — não é alguém tirando dúvida. Curta de propósito: fica
+  // aqui só o que o Marco precisa pra protocolar sem perguntar nada de volta.
+  const saudacao = state.modoSuporte
+    ? 'Marco'
+    : (state.corretorName ? state.corretorName.split(' ')[0] : 'Olá');
+
+  const taxaTxt = linha.t.toString().replace('.', ',');
+
+  const perfil = [`${r.idadeAtual} anos`, `renda familiar R$ ${state.renda.toLocaleString('pt-BR')}`];
   if (!state.classeAlta){
-    partes.push(`• FGTS +3 anos: ${state.cotista ? 'Sim' : 'Não'}`);
-    if (state.casado) partes.push(`• Casado(a) no civil: Sim (renda somada do casal)`);
-    partes.push(`• Dependente: ${state.dependente ? 'Sim' : 'Não'}`);
+    // FGTS e dependente só são perguntados abaixo de R$ 10 mil. Acima disso o
+    // dado não existe, e afirmá-lo faria o corretor abrir proposta no escuro.
+    perfil.push(state.cotista ? 'cotista FGTS +3 anos' : 'não cotista FGTS');
+    if (state.casado) perfil.push('casado(a) no civil (renda somada)');
+    // Aqui vai a resposta que a pessoa deu, não temDependenteEfetivo(): quem é
+    // casado conta como dependente no subsídio, mas o cliente não pode "dizer"
+    // que tem dependente se respondeu que não. O "casado(a) no civil" acima já
+    // explica pro corretor de onde veio o subsídio maior.
+    perfil.push(state.dependente ? 'com dependente' : 'sem dependente');
   }
+
+  const blocos = [];
+
+  blocos.push(isSBPE
+    ? `${saudacao}, fiz a simulação no seu site e caí na faixa SBPE. Quero seguir com a proposta na Caixa.`
+    : `${saudacao}, fiz a simulação no seu site e quero seguir com a proposta na Caixa.`);
+
+  const dados = [`*Perfil:* ${perfil.join(' · ')}`];
   if (isSBPE){
-    partes.push(`\n*Minha estimativa (SBPE)*:`);
-    partes.push(`💰 Financiamento*: R$ ${formatBRL(linha.f)}`);
-    partes.push(`📅 Parcela*: R$ ${formatBRL(linha.p)}`);
-    partes.push(`⏱ Prazo*: ${prazoLabel}`);
-    partes.push(`📊 Taxa*: a partir de ${linha.t.toString().replace('.',',')}% a.a. + TR`);
-    partes.push(`🏠 Imóvel de referência*: R$ ${formatBRLCurto(imovelRefSBPE)}`);
-    partes.push(`\nSei que nessa faixa o valor real depende do meu rating no banco. Pode rodar minha simulação oficial?`);
+    // A entrada entra como premissa do cálculo, dentro do rótulo — não como
+    // fato declarado pelo cliente, que nunca disse ter o dinheiro.
+    dados.push(`*Estimativa (entrada de ~20%):* R$ ${formatBRLRedondo(linha.f)} · parcela R$ ${formatBRLRedondo(linha.p)}`);
+    dados.push(`*Condições:* a partir de ${taxaTxt}% a.a. + TR · ${r.prazoUsado} meses`);
   } else {
-    partes.push(`\n*Resultado da simulação:*`);
-    partes.push(`💰 Financiamento: R$ ${formatBRL(linha.f)}`);
-    if (linha.s > 0) partes.push(`🎁 Subsídio Caixa: R$ ${formatBRL(linha.s)}`);
-    partes.push(`📅 Parcela: R$ ${formatBRL(linha.p)}`);
-    partes.push(`⏱ Prazo: ${prazoLabel}`);
-    partes.push(`📊 Taxa: ${linha.t.toString().replace('.',',')}% ao ano`);
-    partes.push(`🏠 Imóvel até: R$ ${formatBRLCurto(imovelMax)}`);
-    if (state.modoSuporte){
-      partes.push(`\nPode me ajudar com os próximos passos?`);
-    } else {
-      partes.push(`\nQuero falar sobre os imóveis disponíveis. Pode me passar as opções?`);
-    }
+    let sim = `R$ ${formatBRLRedondo(linha.f)}`;
+    if (linha.s > 0) sim += ` + subsídio R$ ${formatBRLRedondo(linha.s)}`;
+    sim += ` · parcela R$ ${formatBRLRedondo(linha.p)}`;
+    dados.push(`*Simulação:* ${sim}`);
+    dados.push(`*Condições:* ${taxaTxt}% a.a. · ${r.prazoUsado} meses · imóvel até R$ ${formatBRLCurto(imovelMax)}`);
   }
+  blocos.push(dados.join('\n'));
+
+  blocos.push(isSBPE
+    ? 'Me manda a lista de documentos para dar entrada e fechar a taxa na análise.'
+    : 'Me manda a lista de documentos para abrir a análise de crédito.');
 
   // Linha de referência: código anônimo + origem da visita. Serve pro corretor
   // saber qual campanha gerou a conversa. Sem renda, nome ou documento.
   const origemRef = refOrigem();
-  partes.push(`\n_ref: ${codigoSimulacao()}${origemRef ? '/' + origemRef : ''}_`);
+  blocos.push(`_ref: ${codigoSimulacao()}${origemRef ? '/' + origemRef : ''}_`);
 
-  const msgWhats = partes.join('\n').replace(/\n+/g,'\n');
+  // Blocos separados por linha em branco. O join antigo era seguido de
+  // replace(/\n+/g,'\n'), que colapsava justamente essas linhas e entregava
+  // a mensagem como um parágrafo único.
+  const msgWhats = blocos.join('\n\n');
   const linkWhats = `https://wa.me/${state.corretorPhone}?text=${encodeURIComponent(msgWhats)}`;
 
   // Barra fixa de WhatsApp — o clique final no celular
   ctaFixo = {
     link: linkWhats,
-    titulo: isSBPE ? 'Pedir simulação oficial' : 'Enviar minha simulação',
+    titulo: 'Seguir com a proposta',
     sub: `${isSBPE ? 'Cerca de ' : ''}R$ ${formatBRLCurto(linha.f)} · direto no WhatsApp`,
-    aria: 'Enviar minha simulação para Marco Túlio no WhatsApp',
+    aria: 'Enviar minha simulação e pedir a lista de documentos no WhatsApp',
   };
 
   let perfilLabel = '';
@@ -1835,12 +1878,10 @@ function stepResultado(){
   ` : '';
 
   // CTAs falam da SIMULAÇÃO (o que a pessoa ganha), não de "falar com alguém"
-  const ctaLabelTop = isSBPE
-    ? '📲 Pedir minha simulação oficial'
-    : '📲 Receber minha simulação completa';
+  const ctaLabelTop = '📲 Quero seguir com a proposta';
   const ctaSubTop = isSBPE
-    ? 'Com a taxa real do seu banco · grátis, no WhatsApp'
-    : 'Grátis e sem compromisso · resposta rápida';
+    ? 'Documentos + taxa real do seu banco · grátis'
+    : 'Você recebe a lista de documentos · grátis';
 
   return `
     <div class="result-hero">
@@ -1901,12 +1942,12 @@ function stepResultado(){
     </div>`}
 
     <div style="margin:20px 0 8px;font-size:13px;font-weight:600;color:var(--navy);">
-      📄 ${isSBPE ? 'Sua estimativa está pronta — peça a simulação oficial:' : 'Sua simulação está pronta — toque pra enviar:'}
+      📄 Sua mensagem está pronta — confira e envie:
     </div>
-    <div class="whats-preview">${msgWhats}</div>
+    <div class="whats-preview">${previewWhats(msgWhats)}</div>
 
     <a href="${linkWhats}" target="_blank" rel="noopener" class="btn btn-whats" id="abrirWhats" data-cta="principal">
-      ${isSBPE ? '📲 Quero minha simulação oficial' : '📲 Enviar minha simulação agora'}
+      📲 Enviar e pedir os documentos
     </a>
     <p class="cta-trust">Abre o WhatsApp com a mensagem pronta — você só confere e envia.<br>
       <strong>Marco Túlio Andrade Freitas</strong> · CRECI/MG 7469 · Uberlândia</p>
@@ -2198,7 +2239,8 @@ function attachStepListeners(){
 
   // O aviso muda de altura entre celular e desktop; a barra fixa de WhatsApp
   // se apoia nessa medida pra nunca ficar por baixo dele.
-  const medir = () => document.body.style.setProperty('--aviso-h', el.offsetHeight + 'px');
+  const medir = () => document.body.style.setProperty(
+    '--aviso-h', Math.ceil(el.getBoundingClientRect().height) + 'px');
   medir();
   window.addEventListener('resize', medir);
 
