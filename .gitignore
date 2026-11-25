@@ -13,3 +13,6 @@ node_modules/
 
 # Netlify
 .netlify/
+
+# Saída de vídeos/sons gerados pelas skills (.claude/)
+producao/
